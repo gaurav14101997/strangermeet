@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StrangerMeet — Talk to Strangers</title>
+    <!-- Site Logo / Favicon (Google Search & Browser Tab ke liye) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232563EB'/%3E%3Cstop offset='100%25' stop-color='%234F46E5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='96' height='96' rx='24' fill='url(%23g)'/%3E%3Cpath d='M28 32h40a8 8 0 0 1 8 8v20a8 8 0 0 1-8 8H44l-12 10v-10h-4a8 8 0 0 1-8-8V40a8 8 0 0 1 8-8z' fill='%23ffffff'/%3E%3Ccircle cx='39' cy='50' r='4' fill='%232563EB'/%3E%3Ccircle cx='48' cy='50' r='4' fill='%232563EB'/%3E%3Ccircle cx='57' cy='50' r='4' fill='%232563EB'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='24' fill='%232563EB'/%3E%3Cpath d='M28 32h40a8 8 0 0 1 8 8v20a8 8 0 0 1-8 8H44l-12 10v-10h-4a8 8 0 0 1-8-8V40a8 8 0 0 1 8-8z' fill='%23ffffff'/%3E%3C/svg%3E">
+    <!-- Google Search & SEO Meta Tags -->
+    <meta name="description" content="Talk to strangers instantly on StrangerMeet. Simple, free, anonymous 1-on-1 random chat with photo sharing.">
+    <meta name="keywords" content="stranger chat, talk to strangers, omegle alternative, anonymous chat, random chat online">
+    <meta name="robots" content="index, follow">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tone.js for subtle match/message chimes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        html, body {
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            display: block !important;
+            padding-bottom: 65px !important;
+        }
+        body > main {
+            min-height: calc(100dvh - 120px) !important;
+        }
+        #chat-view {
+            height: calc(100dvh - 110px);
+        }
+        .safe-bottom {
+            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+        }
+        .typing-dot {
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        @media (max-width: 768px) {
+            [class*="bottom-0"], [class*="fixed"]:not(#legalModal):not(#image-modal):not(#report-modal) {
+                bottom: 56px !important;
+            }
+        }
+        a[href*="netlify"], [data-netlify-badge], #netlify-badge, iframe[src*="netlify"] {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans antialiased w-full">
+
+    <!-- SIMPLE CLEAN TOP BAR -->
+    <header class="h-14 px-4 sm:px-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-base">
+                S
+            </div>
+            <span class="font-bold text-lg tracking-tight text-gray-900 dark:text-white">StrangerMeet</span>
+            <span class="hidden sm:inline text-xs text-gray-500 dark:text-gray-400">• Talk to strangers!</span>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span id="online-count-text">Live • 1-on-1 Chat</span>
+            </div>
+
+            <button id="sound-toggle" onclick="toggleSound()" title="Mute/Unmute" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <i id="sound-icon" data-lucide="volume-2" class="w-4 h-4"></i>
+            </button>
+
+            <button id="theme-toggle" title="Dark/Light Mode" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+                <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex items-center justify-center p-3 sm:p-6">
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: SIMPLE & CLEAN START SCREEN        -->
+        <!-- ========================================== -->
+        <section id="lobby-view" class="w-full max-w-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm p-6 sm:p-8 my-auto">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                    Talk to Strangers
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5">
+                    Simple, free & anonymous 1-on-1 chat. No sign-up needed.
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Optional Name -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                        Your Name (Optional)
+                    </label>
+                    <input type="text" id="alias-input" maxlength="20" placeholder="Stranger" 
+                           class="w-full px-3.5 py-2.5 text-base sm:text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-600">
+                </div>
+
+                <!-- Optional Interests -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">
+                            Interests (Optional — press Enter)
+                        </label>
+                        <span id="tag-counter" class="text-[11px] text-gray-400">0/6</span>
+                    </div>
+                    <div id="tags-box" class="min-h-[44px] p-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl flex flex-wrap items-center gap-1.5 focus-within:border-blue-600">
+                        <input type="text" id="interest-input" placeholder="e.g. music, gaming, cricket..." 
+                               class="flex-1 min-w-[140px] px-2 py-1 text-base sm:text-sm bg-transparent focus:outline-none">
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                        <button type="button" onclick="addSuggestedTag('friendship')" class="px-2.5 py-1 rounded-md text-xs bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 text-gray-600 dark:text-gray-300">+ friendship</button>
+                        <button type="button" onclick="addSuggestedTag('music')" class="px-2.5 py-1 rounded-md text-xs bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 text-gray-600 dark:text-gray-300">+ music</button>
+                        <button type="button" onclick="addSuggestedTag('gaming')" class="px-2.5 py-1 rounded-md text-xs bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 text-gray-600 dark:text-gray-300">+ gaming</button>
+                        <button type="button" onclick="addSuggestedTag('movies')" class="px-2.5 py-1 rounded-md text-xs bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 text-gray-600 dark:text-gray-300">+ movies</button>
+                    </div>
+                </div>
+
+                <!-- Simple 18+ Checkbox -->
+                <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 pt-1 cursor-pointer select-none">
+                    <input type="checkbox" id="age-confirm" checked class="w-4 h-4 rounded accent-blue-600">
+                    <span>I am 18+ and agree to keep the chat respectful.</span>
+                </label>
+
+                <!-- Simple Solid Blue Start Button -->
+                <button onclick="startMatching()" class="w-full py-3.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-semibold text-base transition-colors">
+                    Start Chat
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: SIMPLE & CLEAN CHAT BOX            -->
+        <!-- ========================================== -->
+        <section id="chat-view" class="hidden w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex-col overflow-hidden">
+            
+            <!-- Chat Top Header -->
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-2 flex-shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div id="partner-avatar" class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                        ?
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h2 id="partner-name" class="font-semibold text-sm sm:text-base truncate">Searching...</h2>
+                            <span id="match-badge" class="hidden text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">Online</span>
+                        </div>
+                        <p id="shared-interests-label" class="text-xs text-gray-500 dark:text-gray-400 truncate">Looking for a stranger...</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <button onclick="openReportModal()" id="report-btn" disabled title="Report" class="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40">
+                        <i data-lucide="flag" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="leaveToLobby()" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        Exit
+                    </button>
+                </div>
+            </div>
+
+            <!-- Searching Screen -->
+            <div id="searching-overlay" class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <h3 class="font-semibold text-base sm:text-lg">Looking for someone you can chat with...</h3>
+                <p id="searching-subtext" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Connecting you to an available stranger...
+                </p>
+                <button onclick="leaveToLobby()" class="mt-5 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200">
+                    Cancel
+                </button>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="messages-stream" class="hidden flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 bg-gray-50/50 dark:bg-gray-950/40">
+            </div>
+
+            <!-- Typing Indicator -->
+            <div id="typing-indicator" class="hidden px-5 py-1.5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 flex-shrink-0">
+                <span id="typing-name">Stranger</span> is typing
+                <span class="inline-flex gap-1 items-center">
+                    <span class="typing-dot w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                    <span class="typing-dot w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                    <span class="typing-dot w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                </span>
+            </div>
+
+            <!-- Bottom Input & Controls -->
+            <div class="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 safe-bottom flex-shrink-0">
+                <!-- Quick Icebreakers -->
+                <div id="icebreakers-bar" class="hidden flex items-center gap-1.5 overflow-x-auto pb-2.5 text-xs">
+                    <span class="text-gray-400 flex-shrink-0">Say:</span>
+                    <button type="button" onclick="sendQuickText('Hey! Kaise ho? 👋')" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 whitespace-nowrap">Hey! Kaise ho? 👋</button>
+                    <button type="button" onclick="sendQuickText('Where are you from?')" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 whitespace-nowrap">Where are you from?</button>
+                    <button type="button" onclick="sendQuickText('What are you doing right now?')" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 whitespace-nowrap">What are you doing?</button>
+                </div>
+
+                <!-- Hidden File Input for Photo Upload -->
+                <input type="file" id="photo-input" accept="image/*" class="hidden" onchange="handlePhotoSelected(event)">
+
+                <!-- Chat Control Bar -->
+                <div class="flex items-center gap-2">
+                    <!-- Next / Stop Button -->
+                    <button id="next-btn" onclick="handleNextAction()" class="px-3.5 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 font-semibold text-xs sm:text-sm border border-red-200 dark:border-red-900 transition-colors flex-shrink-0">
+                        Stop / Next
+                    </button>
+
+                    <!-- Photo Upload Button -->
+                    <button id="photo-btn" type="button" onclick="triggerPhotoPicker()" disabled title="Send a photo"
+                            class="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 text-gray-600 dark:text-gray-300 disabled:opacity-40 transition-colors flex-shrink-0">
+                        <i data-lucide="image-plus" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Message Input Box -->
+                    <form onsubmit="handleSendMessage(event)" class="flex-1 flex items-center gap-2 min-w-0">
+                        <input type="text" id="message-input" disabled autocomplete="off" placeholder="Type a message..." 
+                               class="flex-1 min-w-0 px-3.5 py-2.5 text-base sm:text-sm bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-blue-600 focus:bg-white dark:focus:bg-gray-900 rounded-xl focus:outline-none disabled:opacity-50">
+                        <button type="submit" id="send-btn" disabled class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-semibold text-sm transition-colors flex-shrink-0">
+                            Send
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- AdSense Compliance: Content + Legal Modals -->
+    <section id="adsense-info-section" class="max-w-3xl mx-auto px-4 py-8 text-slate-700 dark:text-slate-300 space-y-6">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm space-y-4">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">How StrangerMeet Works</h2>
+            <p class="text-sm leading-relaxed">
+                StrangerMeet (<strong>strangermeet.in</strong>) is a moderated, browser-based 1-on-1 text and photo chat platform for friendly conversations. No sign-up or personal profile is required.
+            </p>
+            <div class="grid md:grid-cols-3 gap-4 pt-2 text-sm">
+                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><strong class="block text-gray-900 dark:text-white mb-1">1. Pick Interests</strong>Add topics like music, gaming, or cricket to match with similar people.</div>
+                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><strong class="block text-gray-900 dark:text-white mb-1">2. Safe 1-on-1 Chat</strong>Instant private chat with built-in Report and Next/Exit buttons.</div>
+                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><strong class="block text-gray-900 dark:text-white mb-1">3. 18+ Community</strong>Strictly respectful conversations; spam or explicit content is banned.</div>
+            </div>
+        </div>
+
+        <footer class="w-full text-center py-4 text-xs text-gray-500 dark:text-gray-400 space-x-3">
+            <button type="button" onclick="openLegal('about')" class="hover:text-blue-600 underline">About Us</button>
+            <span>•</span>
+            <button type="button" onclick="openLegal('privacy')" class="hover:text-blue-600 underline">Privacy Policy</button>
+            <span>•</span>
+            <button type="button" onclick="openLegal('terms')" class="hover:text-blue-600 underline">Terms & Conditions</button>
+            <span>•</span>
+            <button type="button" onclick="openLegal('contact')" class="hover:text-blue-600 underline">Contact Us</button>
+        </footer>
+    </section>
+
+    <!-- LEGAL MODAL (ABOUT / PRIVACY / TERMS / CONTACT) -->
+    <div id="legalModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50" onclick="if(event.target===this)closeLegal()">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6 space-y-4 shadow-xl border border-gray-200 dark:border-gray-800">
+            <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 pb-3">
+                <h3 id="legalTitle" class="text-lg font-bold text-gray-900 dark:text-white"></h3>
+                <button type="button" onclick="closeLegal()" class="text-gray-400 hover:text-gray-700 text-xl font-bold">&times;</button>
+            </div>
+            <div id="legalBody" class="text-sm text-gray-600 dark:text-gray-300 space-y-3 leading-relaxed"></div>
+        </div>
+    </div>
+
+    <!-- IMAGE LIGHTBOX MODAL (ZOOM PHOTO) -->
+    <div id="image-modal" onclick="closeImageModal()" class="fixed inset-0 z-50 hidden bg-black/85 flex items-center justify-center p-4 cursor-zoom-out">
+        <img id="modal-preview-img" src="" alt="Full preview" class="max-w-full max-h-[88vh] rounded-xl shadow-2xl object-contain">
+    </div>
+
+    <!-- REPORT MODAL -->
+    <div id="report-modal" class="fixed inset-0 z-50 hidden bg-black/50 flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-xl">
+            <h3 class="font-bold text-base">Report Stranger</h3>
+            <p class="text-xs text-gray-500 mt-1">Reporting will disconnect this chat immediately.</p>
+            <div class="space-y-2 mt-4">
+                <button onclick="submitReport('Spam or ads')" class="w-full text-left px-3.5 py-2 rounded-lg text-sm bg-gray-100 dark:bg-gray-800 hover:bg-red-50 hover:text-red-600">Spam or promotion</button>
+                <button onclick="submitReport('Inappropriate content')" class="w-full text-left px-3.5 py-2 rounded-lg text-sm bg-gray-100 dark:bg-gray-800 hover:bg-red-50 hover:text-red-600">Inappropriate behavior</button>
+            </div>
+            <button onclick="closeReportModal()" class="mt-4 w-full py-2 text-xs font-medium text-gray-500 hover:text-gray-800">Cancel</button>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col gap-2"></div>
+
+    <!-- LEGAL & NETLIFY CLEANUP SCRIPT -->
+    <script>
+        const legalContent = {
+            about: {
+                title: 'About StrangerMeet',
+                body: '<p><strong>StrangerMeet (strangermeet.in)</strong> is a free, lightweight 1-on-1 random chat platform designed for friendly text and photo conversations without mandatory registration.</p><p>We prioritize user safety with an 18+ policy, instant partner switching, and quick reporting controls.</p>'
+            },
+            privacy: {
+                title: 'Privacy Policy',
+                body: '<p><strong>Data & Chat:</strong> StrangerMeet does not require accounts or phone numbers. Real-time messages and images are transmitted via Google Firebase and are not publicly stored after a session ends.</p><p><strong>Cookies & Ads:</strong> We use basic browser storage and third-party advertising partners like <strong>Google AdSense</strong>, which may use cookies to serve relevant ads. You can manage ad preferences in Google Ads Settings.</p>'
+            },
+            terms: {
+                title: 'Terms & Conditions',
+                body: '<p><strong>18+ Only:</strong> You must be at least 18 years old to use strangermeet.in.</p><p><strong>Rules:</strong> Nudity, sexually explicit content, harassment, hate speech, spam, and sharing private personal data are strictly prohibited. Users are responsible for their own messages and may be blocked for violations.</p>'
+            },
+            contact: {
+                title: 'Contact Us',
+                body: '<p>For support, feedback, or safety reports regarding <strong>strangermeet.in</strong>, email us at:</p><p class="font-semibold text-blue-600">gaurav14101997@gmail.com</p><p>We typically respond within 24–48 hours.</p>'
+            }
+        };
+        function openLegal(type) {
+            document.getElementById('legalTitle').innerText = legalContent[type].title;
+            document.getElementById('legalBody').innerHTML = legalContent[type].body;
+            document.getElementById('legalModal').classList.remove('hidden');
+            document.getElementById('legalModal').classList.add('flex');
+        }
+        function closeLegal() {
+            document.getElementById('legalModal').classList.add('hidden');
+            document.getElementById('legalModal').classList.remove('flex');
+        }
+        setInterval(() => {
+            document.querySelectorAll('body > div:last-of-type, a[href*="netlify"]').forEach(el => {
+                if (el.shadowRoot || (el.innerText && el.innerText.includes('Netlify'))) {
+                    el.remove();
+                }
+            });
+        }, 200);
+    </script>
+
+    <!-- FIREBASE + APP LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const defaultFirebaseConfig = {
+            apiKey: "AIzaSyBN2zAmTvQDdmzO1QAxmM72nI-KoUWlN4U",
+            authDomain: "strangermeet-d15c0.firebaseapp.com",
+            projectId: "strangermeet-d15c0",
+            storageBucket: "strangermeet-d15c0.firebasestorage.app",
+            messagingSenderId: "73376309318",
+            appId: "1:73376309318:web:4e8ffef28f55e6e234ea47",
+            measurementId: "G-Q83VT9L70S"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'strangermeet-d15c0';
+        let firebaseConfig = defaultFirebaseConfig;
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                firebaseConfig = JSON.parse(__firebase_config);
+            }
+        } catch (e) {}
+
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let useFirebase = false;
+
+        const state = {
+            alias: 'Stranger',
+            interests: [],
+            soundEnabled: true,
+            status: 'lobby',
+            roomId: null,
+            partnerName: 'Stranger',
+            isBotSession: false,
+            botPersona: null,
+            botMsgCount: 0,
+            renderedMsgIds: new Set(),
+            unsubRoom: null,
+            unsubMessages: null,
+            searchTimer: null,
+            botFallbackTimer: null,
+            typingTimeout: null
+        };
+
+        const GIRL_PERSONAS = [
+            {
+                name: 'Ananya (F)',
+                city: 'Delhi',
+                greetings: ['Hey! Kaise ho? 😊', 'Hii! Where are you from?', 'Hello! Kya haal hai?'],
+                replies: [
+                    'Oh nice! Main Delhi se hoon, bas abhi free baithi thi.',
+                    'Haha sahi hai! Aur batao kya karte ho?',
+                    'Achha! Waise mujhe music aur late night talks bahut pasand hain.',
+                    'Sahi mein? Tell me more about yourself!',
+                    'Main abhi college assignment khatam karke aayi hoon 😅'
+                ],
+                photoReplies: [
+                    'Wow, nice photo! Kahan ki hai yeh? 😍',
+                    'Bahut achhi pic hai! 👌',
+                    'Ooh nice click! ✨'
+                ]
+            },
+            {
+                name: 'Riya (F)',
+                city: 'Mumbai',
+                greetings: ['Hii there! 👋', 'Hey! Good to meet you 😊', 'Hello! Kahan se ho aap?'],
+                replies: [
+                    'Main Mumbai se hoon! Yahan aaj mausam kaafi achha hai.',
+                    'Haha bilkul! Movies ya web series dekhte ho?',
+                    'Oh interesting! Mujhe travelling ka bahut shauk hai.',
+                    'Sahi kaha! Aaj kal sab busy rehte hain.',
+                    'Haha that is so cool! 😊'
+                ],
+                photoReplies: [
+                    'Hey, cute photo! 😊',
+                    'Mast photo bheji hai! 🔥',
+                    'Nice one! Aur dikhao!'
+                ]
+            },
+            {
+                name: 'Kavya (F)',
+                city: 'Bengaluru',
+                greetings: ['Hey! Anyone there? 👋', 'Hi! Kaise ho aap?', 'Hello! Nice meeting you 😊'],
+                replies: [
+                    'Main Bengaluru se hoon! Coffee peete hue chat kar rahi hoon ☕',
+                    'Achha ji! Aapke hobbies kya hain?',
+                    'Haha same here! Mujhe bhi yeh kaafi pasand hai.',
+                    'Batao aur kya chal raha hai life mein?',
+                    'That sounds fun! 😄'
+                ],
+                photoReplies: [
+                    'Oh wow, really nice pic! ✨',
+                    'Cool photo! Thanks for sharing 😊',
+                    'Bahut badhiya lag raha hai! 👍'
+                ]
+            }
+        ];
+
+        lucide.createIcons();
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        const interestInput = document.getElementById('interest-input');
+        interestInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                addTag(interestInput.value);
+                interestInput.value = '';
+            }
+        });
+
+        window.addSuggestedTag = (tag) => addTag(tag);
+
+        function addTag(raw) {
+            const clean = raw.trim().toLowerCase().replace(/[^a-z0-9\s-]/g, '');
+            if (!clean || state.interests.includes(clean) || state.interests.length >= 6) return;
+            state.interests.push(clean);
+            renderTags();
+        }
+
+        window.removeTag = (tag) => {
+            state.interests = state.interests.filter(t => t !== tag);
+            renderTags();
+        };
+
+        function renderTags() {
+            const box = document.getElementById('tags-box');
+            box.querySelectorAll('.tag-pill').forEach(el => el.remove());
+            state.interests.forEach(tag => {
+                const pill = document.createElement('span');
+                pill.className = 'tag-pill inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-medium';
+                pill.innerHTML = `#${escapeHtml(tag)} <button type="button" onclick="removeTag('${escapeHtml(tag)}')" class="hover:text-red-500 font-bold ml-0.5">&times;</button>`;
+                box.insertBefore(pill, interestInput);
+            });
+            document.getElementById('tag-counter').textContent = `${state.interests.length}/6`;
+        }
+
+        window.toggleSound = () => {
+            state.soundEnabled = !state.soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            icon.setAttribute('data-lucide', state.soundEnabled ? 'volume-2' : 'volume-x');
+            lucide.createIcons();
+            showToast(state.soundEnabled ? 'Sound On' : 'Sound Muted');
+        };
+
+        async function playChime(type = 'msg') {
+            if (!state.soundEnabled || typeof Tone === 'undefined') return;
+            try {
+                await Tone.start();
+                const synth = new Tone.Synth({
+                    oscillator: { type: 'sine' },
+                    envelope: { attack: 0.01, decay: 0.12, sustain: 0, release: 0.1 }
+                }).toDestination();
+                const now = Tone.now();
+                if (type === 'match') {
+                    synth.triggerAttackRelease('C5', '16n', now);
+                    synth.triggerAttackRelease('G5', '16n', now + 0.12);
+                } else {
+                    synth.triggerAttackRelease('E5', '32n', now);
+                }
+                setTimeout(() => synth.dispose(), 800);
+            } catch (e) {}
+        }
+
+        async function boot() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                currentUser = auth.currentUser;
+                useFirebase = Boolean(currentUser);
+            } catch (err) {
+                console.warn('Firebase fallback mode:', err);
+                useFirebase = false;
+            }
+        }
+        boot();
+
+        window.startMatching = async () => {
+            const ageOk = document.getElementById('age-confirm').checked;
+            if (!ageOk) {
+                showToast('Please confirm that you are 18+');
+                return;
+            }
+
+            if (interestInput.value.trim()) {
+                addTag(interestInput.value);
+                interestInput.value = '';
+            }
+
+            const rawAlias = document.getElementById('alias-input').value.trim();
+            state.alias = rawAlias || 'Stranger';
+
+            document.getElementById('lobby-view').classList.add('hidden');
+            document.getElementById('adsense-info-section').classList.add('hidden');
+            const chatView = document.getElementById('chat-view');
+            chatView.classList.remove('hidden');
+            chatView.classList.add('flex');
+
+            beginSearch();
+        };
+
+        async function beginSearch() {
+            cleanupSession();
+            state.status = 'searching';
+            state.isBotSession = false;
+            state.botMsgCount = 0;
+            state.renderedMsgIds.clear();
+
+            document.getElementById('searching-overlay').classList.remove('hidden');
+            document.getElementById('messages-stream').classList.add('hidden');
+            document.getElementById('messages-stream').innerHTML = '';
+            document.getElementById('icebreakers-bar').classList.add('hidden');
+            document.getElementById('typing-indicator').classList.add('hidden');
+            document.getElementById('match-badge').classList.add('hidden');
+            document.getElementById('partner-avatar').textContent = '?';
+            document.getElementById('partner-name').textContent = 'Searching...';
+            document.getElementById('shared-interests-label').textContent = 'Looking for a stranger...';
+            document.getElementById('message-input').disabled = true;
+            document.getElementById('send-btn').disabled = true;
+            document.getElementById('photo-btn').disabled = true;
+            document.getElementById('report-btn').disabled = true;
+            document.getElementById('next-btn').textContent = 'Stop';
+
+            if (useFirebase && currentUser) {
+                await startFirebaseMatchmaking();
+            }
+        }
+
+        async function startFirebaseMatchmaking() {
+            if (!currentUser) return;
+            const uid = currentUser.uid;
+            const queueCol = collection(db, 'artifacts', appId, 'public', 'data', 'match_queue');
+
+            try {
+                const snap = await getDocs(queueCol);
+                let matchedDoc = null;
+                const now = Date.now();
+
+                snap.forEach(d => {
+                    const data = d.data();
+                    if (d.id !== uid && data.status === 'waiting' && (now - (data.createdAt || 0) < 30000)) {
+                        if (!matchedDoc) matchedDoc = { id: d.id, ...data };
+                    }
+                });
+
+                if (matchedDoc) {
+                    const newRoomId = `room_${matchedDoc.id}_${uid}_${now}`;
+                    const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', newRoomId);
+
+                    await setDoc(roomRef, {
+                        users: [matchedDoc.id, uid],
+                        aliases: {
+                            [matchedDoc.id]: matchedDoc.alias || 'Stranger',
+                            [uid]: state.alias
+                        },
+                        interests: {
+                            [matchedDoc.id]: matchedDoc.interests || [],
+                            [uid]: state.interests
+                        },
+                        active: true,
+                        createdAt: now
+                    });
+
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'match_queue', matchedDoc.id), {
+                        status: 'matched',
+                        roomId: newRoomId
+                    });
+
+                    enterConnectedRoom(newRoomId, matchedDoc.alias || 'Stranger', matchedDoc.interests || []);
+                } else {
+                    const myQueueRef = doc(db, 'artifacts', appId, 'public', 'data', 'match_queue', uid);
+                    await setDoc(myQueueRef, {
+                        alias: state.alias,
+                        interests: state.interests,
+                        status: 'waiting',
+                        roomId: null,
+                        createdAt: now
+                    });
+
+                    state.unsubRoom = onSnapshot(myQueueRef, async (docSnap) => {
+                        if (!docSnap.exists() || state.status !== 'searching') return;
+                        const data = docSnap.data();
+                        if (data.status === 'matched' && data.roomId) {
+                            await deleteDoc(myQueueRef).catch(() => {});
+                            const rSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', data.roomId));
+                            if (rSnap.exists()) {
+                                const rData = rSnap.data();
+                                const partnerId = (rData.users || []).find(id => id !== uid);
+                                const pName = (rData.aliases && rData.aliases[partnerId]) || 'Stranger';
+                                const pTags = (rData.interests && rData.interests[partnerId]) || [];
+                                enterConnectedRoom(data.roomId, pName, pTags);
+                            }
+                        }
+                    }, (err) => console.error('Queue snapshot error:', err));
+                }
+            } catch (e) {
+                console.error('Matchmaking error:', e);
+            }
+        }
+
+        function enterConnectedRoom(roomId, partnerName, partnerInterests = []) {
+            if (state.status !== 'searching') return;
+            clearTimeout(state.botFallbackTimer);
+            if (state.unsubRoom) {
+                state.unsubRoom();
+                state.unsubRoom = null;
+            }
+
+            state.status = 'connected';
+            state.roomId = roomId;
+            state.partnerName = partnerName;
+            state.isBotSession = false;
+
+            const shared = state.interests.filter(t => partnerInterests.includes(t));
+            setupConnectedUI(partnerName, shared);
+            playChime('match');
+
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', roomId);
+            state.unsubRoom = onSnapshot(roomRef, (snap) => {
+                if (!snap.exists()) return;
+                const data = snap.data();
+                if (data.active === false && state.status === 'connected') {
+                    handlePartnerDisconnected();
+                }
+            }, (err) => console.error(err));
+
+            const msgsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', roomId, 'messages');
+            state.unsubMessages = onSnapshot(msgsCol, (snap) => {
+                const msgs = [];
+                snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
+                msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                msgs.forEach(m => {
+                    if (!state.renderedMsgIds.has(m.id)) {
+                        state.renderedMsgIds.add(m.id);
+                        const isMe = currentUser && m.senderId === currentUser.uid;
+                        appendMessageBubble(m.text || '', isMe, m.timestamp, m.imageData || null);
+                        if (!isMe) playChime('msg');
+                    }
+                });
+            }, (err) => console.error(err));
+        }
+
+        function connectGirlPersona() {
+            if (state.status !== 'searching') return;
+            if (useFirebase && currentUser) {
+                deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'match_queue', currentUser.uid)).catch(() => {});
+            }
+            if (state.unsubRoom) {
+                state.unsubRoom();
+                state.unsubRoom = null;
+            }
+
+            const persona = GIRL_PERSONAS[Math.floor(Math.random() * GIRL_PERSONAS.length)];
+            state.status = 'connected';
+            state.isBotSession = true;
+            state.botPersona = persona;
+            state.partnerName = persona.name;
+
+            setupConnectedUI(persona.name, state.interests.slice(0, 2));
+            playChime('match');
+
+            setTimeout(() => {
+                if (state.status !== 'connected' || !state.isBotSession) return;
+                showTyping(true);
+                setTimeout(() => {
+                    if (state.status !== 'connected' || !state.isBotSession) return;
+                    showTyping(false);
+                    const greet = persona.greetings[Math.floor(Math.random() * persona.greetings.length)];
+                    appendMessageBubble(greet, false, Date.now());
+                    playChime('msg');
+                }, 1300);
+            }, 900);
+        }
+
+        function setupConnectedUI(partnerName, sharedTags) {
+            document.getElementById('searching-overlay').classList.add('hidden');
+            document.getElementById('messages-stream').classList.remove('hidden');
+            document.getElementById('icebreakers-bar').classList.remove('hidden');
+            document.getElementById('match-badge').classList.remove('hidden');
+
+            document.getElementById('partner-avatar').textContent = partnerName.charAt(0).toUpperCase();
+            document.getElementById('partner-name').textContent = partnerName;
+            document.getElementById('typing-name').textContent = partnerName;
+            document.getElementById('shared-interests-label').textContent = sharedTags.length
+                ? `You both like: ${sharedTags.map(t => '#' + t).join(', ')}`
+                : 'Connected with a random stranger';
+
+            document.getElementById('message-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            document.getElementById('photo-btn').disabled = false;
+            document.getElementById('report-btn').disabled = false;
+            document.getElementById('next-btn').textContent = 'Next';
+            document.getElementById('message-input').focus();
+
+            appendSystemBanner(`You're now chatting with ${partnerName}. Say hi!`);
+        }
+
+        window.handleSendMessage = async (e) => {
+            if (e) e.preventDefault();
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            if (!text || state.status !== 'connected') return;
+
+            input.value = '';
+            document.getElementById('icebreakers-bar').classList.add('hidden');
+            await dispatchMessage(text, null);
+        };
+
+        window.sendQuickText = async (text) => {
+            if (state.status !== 'connected') return;
+            document.getElementById('icebreakers-bar').classList.add('hidden');
+            await dispatchMessage(text, null);
+        };
+
+        window.triggerPhotoPicker = () => {
+            if (state.status !== 'connected') return;
+            document.getElementById('photo-input').click();
+        };
+
+        window.handlePhotoSelected = (event) => {
+            const file = event.target.files && event.target.files[0];
+            event.target.value = '';
+            if (!file || state.status !== 'connected') return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('Please select an image file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = async () => {
+                    const maxDim = 650;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) {
+                            h = Math.round((h * maxDim) / w);
+                            w = maxDim;
+                        } else {
+                            w = Math.round((w * maxDim) / h);
+                            h = maxDim;
+                        }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+
+                    document.getElementById('icebreakers-bar').classList.add('hidden');
+                    await dispatchMessage('', compressedDataUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        async function dispatchMessage(text, imageData) {
+            const now = Date.now();
+            if (state.isBotSession) {
+                appendMessageBubble(text, true, now, imageData);
+                triggerBotReply(text, Boolean(imageData));
+                return;
+            }
+
+            if (useFirebase && currentUser && state.roomId) {
+                try {
+                    const msgsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId, 'messages');
+                    await addDoc(msgsCol, {
+                        senderId: currentUser.uid,
+                        text: text || '',
+                        imageData: imageData || null,
+                        timestamp: now
+                    });
+                } catch (err) {
+                    showToast('Failed to send message');
+                }
+            }
+        }
+
+        function triggerBotReply(userText, hasPhoto) {
+            const persona = state.botPersona;
+            if (!persona) return;
+            state.botMsgCount++;
+
+            setTimeout(() => {
+                if (state.status !== 'connected' || !state.isBotSession) return;
+                showTyping(true);
+
+                const delay = 1200 + Math.random() * 1200;
+                setTimeout(() => {
+                    if (state.status !== 'connected' || !state.isBotSession) return;
+                    showTyping(false);
+
+                    let reply = '';
+                    const lower = (userText || '').toLowerCase();
+                    if (hasPhoto) {
+                        reply = persona.photoReplies[Math.floor(Math.random() * persona.photoReplies.length)];
+                    } else if (lower.includes('kahan') || lower.includes('where') || lower.includes('from')) {
+                        reply = `Main ${persona.city} se hoon! Aur tum kahan se ho? 😊`;
+                    } else if (lower.includes('naam') || lower.includes('name')) {
+                        reply = `Mera naam ${persona.name.replace(' (F)', '')} hai! Tumhara naam kya hai?`;
+                    } else if (lower.includes('kaise') || lower.includes('how are')) {
+                        reply = 'Main bilkul badhiya hoon! Tum batao kya chal raha hai? 😊';
+                    } else {
+                        reply = persona.replies[(state.botMsgCount - 1) % persona.replies.length];
+                    }
+
+                    appendMessageBubble(reply, false, Date.now());
+                    playChime('msg');
+                }, delay);
+            }, 600);
+        }
+
+        function appendSystemBanner(text) {
+            const stream = document.getElementById('messages-stream');
+            const div = document.createElement('div');
+            div.className = 'text-center text-xs text-gray-500 dark:text-gray-400 py-1';
+            div.textContent = text;
+            stream.appendChild(div);
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function appendMessageBubble(text, isMe, timestamp, imageData = null) {
+            const stream = document.getElementById('messages-stream');
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
+
+            const senderLabel = document.createElement('span');
+            senderLabel.className = 'text-[11px] font-medium text-gray-400 mb-0.5 px-1';
+            senderLabel.textContent = isMe ? 'You' : state.partnerName;
+
+            const bubble = document.createElement('div');
+            bubble.className = isMe
+                ? 'max-w-[80%] sm:max-w-[70%] rounded-2xl rounded-br-sm px-3.5 py-2.5 bg-blue-600 text-white text-sm shadow-sm'
+                : 'max-w-[80%] sm:max-w-[70%] rounded-2xl rounded-bl-sm px-3.5 py-2.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 text-sm shadow-sm';
+
+            if (imageData) {
+                const img = document.createElement('img');
+                img.src = imageData;
+                img.alt = 'Shared photo';
+                img.className = 'max-w-full max-h-60 rounded-lg cursor-zoom-in object-cover';
+                img.onclick = () => openImageModal(imageData);
+                bubble.appendChild(img);
+            }
+
+            if (text) {
+                const p = document.createElement('p');
+                p.className = imageData ? 'mt-1.5 break-words' : 'break-words';
+                p.textContent = text;
+                bubble.appendChild(p);
+            }
+
+            wrapper.appendChild(senderLabel);
+            wrapper.appendChild(bubble);
+            stream.appendChild(wrapper);
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function showTyping(visible) {
+            const el = document.getElementById('typing-indicator');
+            if (visible) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+        window.handleNextAction = async () => {
+            if (state.status === 'searching') {
+                leaveToLobby();
+                return;
+            }
+            await notifyRoomClosed();
+            beginSearch();
+        };
+
+        window.leaveToLobby = async () => {
+            await notifyRoomClosed();
+            cleanupSession();
+            state.status = 'lobby';
+            const chatView = document.getElementById('chat-view');
+            chatView.classList.add('hidden');
+            chatView.classList.remove('flex');
+            document.getElementById('lobby-view').classList.remove('hidden');
+            document.getElementById('adsense-info-section').classList.remove('hidden');
+        };
+
+        function handlePartnerDisconnected() {
+            state.status = 'disconnected';
+            showTyping(false);
+            document.getElementById('message-input').disabled = true;
+            document.getElementById('send-btn').disabled = true;
+            document.getElementById('photo-btn').disabled = true;
+            document.getElementById('match-badge').classList.add('hidden');
+            document.getElementById('next-btn').textContent = 'New Chat';
+            appendSystemBanner(`${state.partnerName} has disconnected.`);
+        }
+
+        async function notifyRoomClosed() {
+            if (useFirebase && currentUser) {
+                deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'match_queue', currentUser.uid)).catch(() => {});
+                if (state.roomId && !state.isBotSession) {
+                    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId), {
+                        active: false
+                    }).catch(() => {});
+                }
+            }
+        }
+
+        function cleanupSession() {
+            clearTimeout(state.botFallbackTimer);
+            if (state.unsubRoom) { state.unsubRoom(); state.unsubRoom = null; }
+            if (state.unsubMessages) { state.unsubMessages(); state.unsubMessages = null; }
+            state.roomId = null;
+        }
+
+        window.openImageModal = (src) => {
+            document.getElementById('modal-preview-img').src = src;
+            document.getElementById('image-modal').classList.remove('hidden');
+        };
+
+        window.closeImageModal = () => {
+            document.getElementById('image-modal').classList.add('hidden');
+        };
+
+        window.openReportModal = () => {
+            document.getElementById('report-modal').classList.remove('hidden');
+        };
+
+        window.closeReportModal = () => {
+            document.getElementById('report-modal').classList.add('hidden');
+        };
+
+        window.submitReport = async (reason) => {
+            closeReportModal();
+            showToast(`Reported (${reason}). Finding next stranger...`);
+            await handleNextAction();
+        };
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'px-4 py-2 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium shadow-lg transition-opacity';
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
