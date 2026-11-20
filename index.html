@@ -3,17 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StrangerMeet — Talk to Strangers</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232563EB'/%3E%3Cstop offset='100%25' stop-color='%234F46E5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='96' height='96' rx='24' fill='url(%23g)'/%3E%3Cpath d='M28 32h40a8 8 0 0 1 8 8v20a8 8 0 0 1-8 8H44l-12 10v-10h-4a8 8 0 0 1-8-8V40a8 8 0 0 1 8-8z' fill='%23ffffff'/%3E%3Ccircle cx='39' cy='50' r='4' fill='%232563EB'/%3E%3Ccircle cx='48' cy='50' r='4' fill='%232563EB'/%3E%3Ccircle cx='57' cy='50' r='4' fill='%232563EB'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='24' fill='%232563EB'/%3E%3Cpath d='M28 32h40a8 8 0 0 1 8 8v20a8 8 0 0 1-8 8H44l-12 10v-10h-4a8 8 0 0 1-8-8V40a8 8 0 0 1 8-8z' fill='%23ffffff'/%3E%3C/svg%3E">
-    <meta name="description" content="Talk to strangers instantly on StrangerMeet. Simple, free, anonymous 1-on-1 random chat with photo sharing, friends, and voice/video calls.">
-    <meta name="keywords" content="stranger chat, talk to strangers, omegle alternative, anonymous chat, random chat online">
+    <title>StrangerMeet — Free Anonymous 1-on-1 Chat, Friends & Voice/Video Calls</title>
+
+    <!-- Hosted Favicon for Browser Tabs & Google Search Results -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="96x96">
+    <link rel="shortcut icon" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+
+    <!-- Primary SEO & OpenGraph Meta Tags -->
+    <meta name="description" content="StrangerMeet (strangermeet.in) is a free, safe, and anonymous 1-on-1 random chat platform. Match by interests, share photos, add friends, and enjoy free WebRTC voice and video calls.">
+    <meta name="keywords" content="strangermeet, talk to strangers, anonymous chat, free random chat india, 1 on 1 chat, stranger video call">
+    <meta name="author" content="StrangerMeet">
     <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://strangermeet.in/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="StrangerMeet">
+    <meta property="og:title" content="StrangerMeet — Talk to Strangers & Make Friends">
+    <meta property="og:description" content="Instant 1-on-1 random chat with interest matching, photo sharing, friend lists, and free voice/video calls.">
+    <meta property="og:url" content="https://strangermeet.in/">
+    <meta property="og:image" content="https://strangermeet.in/favicon.svg">
+
+    <!-- Structured Data (Schema.org) for Google Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "StrangerMeet",
+      "alternateName": "strangermeet.in",
+      "url": "https://strangermeet.in/",
+      "description": "Free anonymous 1-on-1 random chat platform with interest matching, friend connections, and peer-to-peer voice and video calls."
+    }
+    </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
@@ -36,13 +62,10 @@
             overflow-y: auto !important;
             overflow-x: hidden !important;
             display: block !important;
-            padding-bottom: 65px !important;
-        }
-        body > main {
-            min-height: calc(100dvh - 120px) !important;
+            padding-bottom: 40px !important;
         }
         #chat-view {
-            height: calc(100dvh - 110px);
+            height: calc(100dvh - 88px);
         }
         .safe-bottom {
             padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
@@ -56,33 +79,36 @@
             0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
             40% { transform: scale(1); opacity: 1; }
         }
-        @media (max-width: 768px) {
-            [class*="bottom-0"], [class*="fixed"]:not(#legalModal):not(#image-modal):not(#report-modal):not(#friends-modal):not(#call-modal):not(#incoming-call-banner) {
-                bottom: 56px !important;
-            }
-        }
         a[href*="netlify"], [data-netlify-badge], #netlify-badge, iframe[src*="netlify"] {
             display: none !important;
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans antialiased w-full">
+<body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans antialiased w-full">
 
-    <!-- TOP BAR -->
-    <header class="h-14 px-4 sm:px-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between flex-shrink-0">
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-40 h-14 px-4 sm:px-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
         <div class="flex items-center gap-2.5 cursor-pointer" onclick="leaveToLobby()">
-            <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-base">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-sm">
                 S
             </div>
             <span class="font-bold text-lg tracking-tight text-gray-900 dark:text-white">StrangerMeet</span>
-            <span class="hidden md:inline text-xs text-gray-500 dark:text-gray-400">• Talk to strangers!</span>
+            <span class="hidden lg:inline text-xs text-gray-500 dark:text-gray-400">• Anonymous 1-on-1 Chat</span>
         </div>
 
-        <div class="flex items-center gap-2 sm:gap-2.5">
-            <!-- Live Badge (Hidden on mobile) -->
+        <!-- Clean Navigation Links for AdSense & Users -->
+        <nav class="hidden md:flex items-center gap-5 text-xs font-medium text-gray-600 dark:text-gray-300">
+            <a href="#how-it-works" onclick="leaveToLobby()" class="hover:text-blue-600 transition-colors">How It Works</a>
+            <a href="#safety-guidelines" onclick="leaveToLobby()" class="hover:text-blue-600 transition-colors">Safety</a>
+            <a href="#faq-section" onclick="leaveToLobby()" class="hover:text-blue-600 transition-colors">FAQ</a>
+            <button type="button" onclick="openLegal('about')" class="hover:text-blue-600 transition-colors">About</button>
+        </nav>
+
+        <div class="flex items-center gap-2">
+            <!-- Live Badge (Desktop only) -->
             <div class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span id="online-count-text">Live • 1-on-1 Chat</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Live</span>
             </div>
 
             <!-- Friends Drawer Button -->
@@ -124,26 +150,29 @@
         </div>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 flex items-center justify-center p-3 sm:p-6">
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex flex-col items-center justify-center px-3 sm:px-6 pt-5 pb-4">
 
         <!-- ========================================== -->
-        <!-- VIEW 1: START SCREEN                       -->
+        <!-- VIEW 1: START SCREEN (LOBBY)               -->
         <!-- ========================================== -->
-        <section id="lobby-view" class="w-full max-w-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm p-6 sm:p-8 my-auto">
+        <section id="lobby-view" class="w-full max-w-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm p-6 sm:p-8">
             <div class="text-center mb-6">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                    Talk to Strangers
+                <span class="inline-block px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 mb-2">
+                    100% Free • Instant Browser Chat
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                    Talk to Strangers Online
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5">
-                    Simple, free & anonymous 1-on-1 chat. Add friends & call anytime.
+                    Start an anonymous 1-on-1 text & photo chat instantly. Add friends to unlock free voice & video calls.
                 </p>
             </div>
 
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                        Your Name (Optional)
+                        Display Nickname (Optional)
                     </label>
                     <input type="text" id="alias-input" maxlength="20" placeholder="Stranger" 
                            class="w-full px-3.5 py-2.5 text-base sm:text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-600">
@@ -152,12 +181,12 @@
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                            Interests (Optional — press Enter)
+                            Shared Interests (Optional — press Enter)
                         </label>
                         <span id="tag-counter" class="text-[11px] text-gray-400">0/6</span>
                     </div>
                     <div id="tags-box" class="min-h-[44px] p-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl flex flex-wrap items-center gap-1.5 focus-within:border-blue-600">
-                        <input type="text" id="interest-input" placeholder="e.g. music, gaming, cricket..." 
+                        <input type="text" id="interest-input" placeholder="e.g. music, gaming, cricket, movies..." 
                                class="flex-1 min-w-[140px] px-2 py-1 text-base sm:text-sm bg-transparent focus:outline-none">
                     </div>
                     <div class="mt-2 flex flex-wrap gap-1.5">
@@ -168,20 +197,20 @@
                     </div>
                 </div>
 
-                <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 pt-1 cursor-pointer select-none">
-                    <input type="checkbox" id="age-confirm" checked class="w-4 h-4 rounded accent-blue-600">
-                    <span>I am 18+ and agree to keep the chat respectful.</span>
+                <label class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400 pt-1 cursor-pointer select-none">
+                    <input type="checkbox" id="age-confirm" checked class="w-4 h-4 mt-0.5 rounded accent-blue-600">
+                    <span>I confirm I am 18+ years old and agree to follow the <button type="button" onclick="openLegal('terms')" class="text-blue-600 underline">Terms & Community Guidelines</button>.</span>
                 </label>
 
-                <button onclick="startMatching()" class="w-full py-3.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-semibold text-base transition-colors">
+                <button onclick="startMatching()" class="w-full py-3.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-semibold text-base shadow-sm transition-all">
                     Start Random Chat
                 </button>
 
                 <!-- Quick Saved Friends Preview on Lobby -->
                 <div id="lobby-friends-box" class="hidden pt-3 border-t border-gray-200 dark:border-gray-800">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">Saved Friends</span>
-                        <button type="button" onclick="openFriendsModal()" class="text-xs text-blue-600 hover:underline">View all</button>
+                        <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">Your Saved Friends</span>
+                        <button type="button" onclick="openFriendsModal()" class="text-xs text-blue-600 hover:underline">Manage all</button>
                     </div>
                     <div id="lobby-friends-list" class="flex flex-wrap gap-2"></div>
                 </div>
@@ -189,7 +218,7 @@
         </section>
 
         <!-- ========================================== -->
-        <!-- VIEW 2: CHAT BOX (RANDOM + FRIEND CHAT)    -->
+        <!-- VIEW 2: ACTIVE CHAT BOX                    -->
         <!-- ========================================== -->
         <section id="chat-view" class="hidden w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex-col overflow-hidden">
             
@@ -210,23 +239,19 @@
                 </div>
 
                 <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-                    <!-- Add Friend Button (Visible when chatting with non-friend stranger) -->
                     <button onclick="handleAddFriendClick()" id="add-friend-btn" class="hidden items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 text-blue-600 dark:text-blue-400 text-xs font-semibold transition-colors" title="Add Friend">
                         <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                         <span id="add-friend-text" class="hidden sm:inline">Add Friend</span>
                     </button>
 
-                    <!-- Voice Call Button (Only active for connected Friends) -->
                     <button onclick="startCall('audio')" id="voice-call-btn" class="hidden p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 transition-colors" title="Voice Call">
                         <i data-lucide="phone" class="w-4 h-4"></i>
                     </button>
 
-                    <!-- Video Call Button (Only active for connected Friends) -->
                     <button onclick="startCall('video')" id="video-call-btn" class="hidden p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 transition-colors" title="Video Call">
                         <i data-lucide="video" class="w-4 h-4"></i>
                     </button>
 
-                    <!-- Unfriend Button (Only active for connected Friends) -->
                     <button onclick="unfriendCurrentPartner()" id="unfriend-header-btn" class="hidden p-2 rounded-lg bg-red-50 dark:bg-red-950/60 hover:bg-red-100 text-red-600 dark:text-red-400 transition-colors" title="Unfriend">
                         <i data-lucide="user-minus" class="w-4 h-4"></i>
                     </button>
@@ -240,7 +265,7 @@
                 </div>
             </div>
 
-            <!-- Incoming Friend Request Banner inside Chat -->
+            <!-- Incoming Friend Request Banner -->
             <div id="friend-request-banner" class="hidden px-4 py-2.5 bg-blue-50 dark:bg-blue-950/80 border-b border-blue-200 dark:border-blue-900 flex items-center justify-between gap-2 text-xs">
                 <span class="font-medium text-blue-900 dark:text-blue-200">
                     <strong id="req-sender-name">Stranger</strong> sent you a Friend Request!
@@ -264,8 +289,7 @@
             </div>
 
             <!-- Messages Stream -->
-            <div id="messages-stream" class="hidden flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 bg-gray-50/50 dark:bg-gray-950/40">
-            </div>
+            <div id="messages-stream" class="hidden flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 bg-gray-50/50 dark:bg-gray-950/40"></div>
 
             <!-- Typing Indicator -->
             <div id="typing-indicator" class="hidden px-5 py-1.5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 flex-shrink-0">
@@ -310,30 +334,141 @@
         </section>
     </main>
 
-    <!-- AdSense Compliance Info + Footer -->
-    <section id="adsense-info-section" class="max-w-3xl mx-auto px-4 py-8 text-slate-700 dark:text-slate-300 space-y-6">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm space-y-4">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white">How StrangerMeet Works</h2>
-            <p class="text-sm leading-relaxed">
-                StrangerMeet (<strong>strangermeet.in</strong>) is a moderated, browser-based 1-on-1 text, photo, and friend calling platform for friendly conversations. No sign-up or personal profile is required.
-            </p>
-            <div class="grid md:grid-cols-3 gap-4 pt-2 text-sm">
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><strong class="block text-gray-900 dark:text-white mb-1">1. Pick Interests</strong>Add topics like music, gaming, or cricket to match with similar people.</div>
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><strong class="block text-gray-900 dark:text-white mb-1">2. Add Friends & Call</strong>Send a mutual friend request during chat to unlock direct messages and free voice/video calls.</div>
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><strong class="block text-gray-900 dark:text-white mb-1">3. 18+ Community</strong>Strictly respectful conversations; spam or explicit content is banned.</div>
+    <!-- ========================================================================= -->
+    <!-- RICH EDITORIAL CONTENT SECTION (FOR GOOGLE ADSENSE & ORGANIC SEO)         -->
+    <!-- ========================================================================= -->
+    <div id="adsense-info-section" class="max-w-4xl mx-auto px-4 py-8 text-slate-700 dark:text-slate-300 space-y-8">
+        
+        <!-- Section 1: Platform Overview & How It Works -->
+        <section id="how-it-works" class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8 shadow-sm space-y-5">
+            <div class="space-y-2">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">How StrangerMeet Works</h2>
+                <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                    <strong>StrangerMeet (strangermeet.in)</strong> is a fast, browser-based 1-on-1 social discovery and communication platform built for genuine, respectful conversations. Unlike traditional social networks that require lengthy sign-up forms, email verification, or phone numbers, StrangerMeet connects you with another online user in seconds while keeping your identity private until you choose to connect as friends.
+                </p>
             </div>
-        </div>
 
-        <footer class="w-full text-center py-4 text-xs text-gray-500 dark:text-gray-400 space-x-3">
-            <button type="button" onclick="openLegal('about')" class="hover:text-blue-600 underline">About Us</button>
-            <span>•</span>
-            <button type="button" onclick="openLegal('privacy')" class="hover:text-blue-600 underline">Privacy Policy</button>
-            <span>•</span>
-            <button type="button" onclick="openLegal('terms')" class="hover:text-blue-600 underline">Terms & Conditions</button>
-            <span>•</span>
-            <button type="button" onclick="openLegal('contact')" class="hover:text-blue-600 underline">Contact Us</button>
+            <div class="grid md:grid-cols-3 gap-4 pt-2 text-sm">
+                <div class="p-4 bg-gray-50 dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-800 space-y-1.5">
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">1</div>
+                    <h3 class="font-bold text-gray-900 dark:text-white">Choose Your Interests</h3>
+                    <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-400">Enter a nickname and add up to six interest tags—such as music, cricket, movies, coding, or travel—to spark meaningful conversations right away.</p>
+                </div>
+                <div class="p-4 bg-gray-50 dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-800 space-y-1.5">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">2</div>
+                    <h3 class="font-bold text-gray-900 dark:text-white">Instant 1-on-1 Chat & Photos</h3>
+                    <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-400">Chat in real time with low-latency messaging and instant image sharing. Not enjoying the vibe? Click <strong>Next</strong> at any moment to switch to someone new.</p>
+                </div>
+                <div class="p-4 bg-gray-50 dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-800 space-y-1.5">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">3</div>
+                    <h3 class="font-bold text-gray-900 dark:text-white">Add Friends & Free Calls</h3>
+                    <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-400">Met someone awesome? Send a mutual <strong>Friend Request</strong>. Once accepted, you can message anytime and make free encrypted WebRTC voice and video calls.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Safety & Community Guidelines -->
+        <section id="safety-guidelines" class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8 shadow-sm space-y-4">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Safety & Community Guidelines</h2>
+            <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                Keeping StrangerMeet welcoming and secure is our highest priority. Every user must follow these core community standards:
+            </p>
+            <ul class="grid sm:grid-cols-2 gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                <li class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/70">
+                    <strong class="text-gray-900 dark:text-white block mb-1">18+ Adults Only</strong>
+                    StrangerMeet is strictly intended for users aged 18 years and older. Minors are not permitted to use this service.
+                </li>
+                <li class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/70">
+                    <strong class="text-gray-900 dark:text-white block mb-1">Zero Tolerance for Abuse</strong>
+                    Harassment, hate speech, nudity, sexually explicit images, threats, and commercial spam result in immediate disconnection and reporting.
+                </li>
+                <li class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/70">
+                    <strong class="text-gray-900 dark:text-white block mb-1">Mutual Consent for Calls</strong>
+                    Voice and video calling features remain locked during random stranger chats and only unlock after both users mutually accept a friend request.
+                </li>
+                <li class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/70">
+                    <strong class="text-gray-900 dark:text-white block mb-1">Protect Personal Information</strong>
+                    Never share sensitive personal details such as home addresses, passwords, financial information, or government IDs with strangers online.
+                </li>
+            </ul>
+        </section>
+
+        <!-- Section 3: Frequently Asked Questions (FAQ) -->
+        <section id="faq-section" class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8 shadow-sm space-y-4">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Frequently Asked Questions (FAQ)</h2>
+            <div class="divide-y divide-gray-200 dark:divide-gray-800 text-sm">
+                <details class="py-3.5 group" open>
+                    <summary class="font-semibold text-gray-900 dark:text-white cursor-pointer flex justify-between items-center">
+                        <span>Is StrangerMeet completely free to use?</span>
+                        <span class="text-blue-600 text-xs group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Yes. Random 1-on-1 text chat, photo sharing, adding friends, and peer-to-peer WebRTC voice and video calls on strangermeet.in are 100% free with no hidden subscriptions or coin packages.
+                    </p>
+                </details>
+                <details class="py-3.5 group">
+                    <summary class="font-semibold text-gray-900 dark:text-white cursor-pointer flex justify-between items-center">
+                        <span>Do I need to create an account or give my phone number?</span>
+                        <span class="text-blue-600 text-xs group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        No registration, email, or phone number is required. StrangerMeet assigns a secure anonymous session token to your browser so you can start chatting immediately while keeping your saved friends list intact on your device.
+                    </p>
+                </details>
+                <details class="py-3.5 group">
+                    <summary class="font-semibold text-gray-900 dark:text-white cursor-pointer flex justify-between items-center">
+                        <span>How do Voice and Video Calls work?</span>
+                        <span class="text-blue-600 text-xs group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        During a random chat, click <strong>Add Friend</strong> in the chat header. Once the other user clicks <strong>Accept</strong>, Phone and Video icons unlock automatically. Calls use encrypted peer-to-peer WebRTC directly between both browsers.
+                    </p>
+                </details>
+                <details class="py-3.5 group">
+                    <summary class="font-semibold text-gray-900 dark:text-white cursor-pointer flex justify-between items-center">
+                        <span>Can I remove or unfriend someone later?</span>
+                        <span class="text-blue-600 text-xs group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Yes. Open the <strong>Friends</strong> menu at the top or open your direct friend chat and click the <strong>Unfriend</strong> icon. Removing a friend immediately revokes direct calling permissions for both sides.
+                    </p>
+                </details>
+                <details class="py-3.5 group">
+                    <summary class="font-semibold text-gray-900 dark:text-white cursor-pointer flex justify-between items-center">
+                        <span>How do I report inappropriate behavior?</span>
+                        <span class="text-blue-600 text-xs group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Click the flag (<strong>Report</strong>) icon in the top-right corner of the chat window or press <strong>Next</strong> to leave immediately. For serious safety concerns, contact us directly via our Contact Us page.
+                    </p>
+                </details>
+            </div>
+        </section>
+
+        <!-- Clean Footer -->
+        <footer class="w-full text-center py-4 text-xs text-gray-500 dark:text-gray-400 space-y-2">
+            <div class="space-x-3">
+                <button type="button" onclick="openLegal('about')" class="hover:text-blue-600 underline">About Us</button>
+                <span>•</span>
+                <button type="button" onclick="openLegal('privacy')" class="hover:text-blue-600 underline">Privacy Policy</button>
+                <span>•</span>
+                <button type="button" onclick="openLegal('terms')" class="hover:text-blue-600 underline">Terms & Conditions</button>
+                <span>•</span>
+                <button type="button" onclick="openLegal('contact')" class="hover:text-blue-600 underline">Contact Us</button>
+            </div>
+            <p class="text-[11px] text-gray-400">© 2026 StrangerMeet (strangermeet.in). All rights reserved. 18+ Community.</p>
         </footer>
-    </section>
+    </div>
+
+    <!-- COOKIE CONSENT BANNER (ADSENSE COMPLIANCE) -->
+    <div id="cookie-banner" class="hidden fixed bottom-3 left-3 right-3 sm:left-auto sm:right-5 sm:max-w-md z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-xl">
+        <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+            We use browser storage and cookies (including Google AdSense) to keep your friends list active and personalize content. Read our <button type="button" onclick="openLegal('privacy')" class="text-blue-600 underline font-medium">Privacy Policy</button>.
+        </p>
+        <div class="mt-3 flex justify-end gap-2">
+            <button type="button" onclick="acceptCookies()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold">Accept & Continue</button>
+        </div>
+    </div>
 
     <!-- FRIENDS LIST MODAL -->
     <div id="friends-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50" onclick="if(event.target===this)closeFriendsModal()">
@@ -415,24 +550,24 @@
     <!-- TOAST NOTIFICATION -->
     <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col gap-2"></div>
 
-    <!-- LEGAL & CLEANUP SCRIPT -->
+    <!-- LEGAL, COOKIE & CLEANUP SCRIPT -->
     <script>
         const legalContent = {
             about: {
                 title: 'About StrangerMeet',
-                body: '<p><strong>StrangerMeet (strangermeet.in)</strong> is a free, lightweight 1-on-1 random chat platform designed for friendly text, photo, and friend voice/video conversations without mandatory registration.</p><p>We prioritize user safety with an 18+ policy, instant partner switching, and quick reporting controls.</p>'
+                body: '<p><strong>StrangerMeet (strangermeet.in)</strong> is a free, modern 1-on-1 random chat and social discovery web application designed to help adults connect safely across India and worldwide.</p><p>Our mission is to keep online conversations fast, lightweight, and spam-free—offering interest-based matching, real-time photo sharing, mutual friend lists, and encrypted peer-to-peer WebRTC voice and video calling without mandatory sign-ups.</p>'
             },
             privacy: {
                 title: 'Privacy Policy',
-                body: '<p><strong>Data & Chat:</strong> StrangerMeet does not require accounts or phone numbers. Real-time messages and images are transmitted via Google Firebase. Voice and video calls between connected friends use encrypted peer-to-peer WebRTC.</p><p><strong>Cookies & Ads:</strong> We use basic browser storage and third-party advertising partners like <strong>Google AdSense</strong>, which may use cookies to serve relevant ads.</p>'
+                body: '<p><strong>1. Information We Collect:</strong> StrangerMeet does not require registration, email addresses, or phone numbers. We use Firebase Anonymous Authentication to assign a temporary browser identifier so your saved friends list remains available on your device.</p><p><strong>2. Messages & WebRTC Calls:</strong> Text and image messages are transmitted via Google Cloud Firestore. Voice and video calls between mutually accepted friends use direct peer-to-peer WebRTC encryption and are never recorded or stored on our servers.</p><p><strong>3. Advertising & Cookies:</strong> We partner with third-party advertising networks such as <strong>Google AdSense</strong>, which may use cookies or web beacons to serve relevant advertisements based on your visits. You may opt out of personalized advertising by visiting <a href="https://adssettings.google.com" target="_blank" rel="noopener" class="text-blue-600 underline">Google Ads Settings</a>.</p>'
             },
             terms: {
                 title: 'Terms & Conditions',
-                body: '<p><strong>18+ Only:</strong> You must be at least 18 years old to use strangermeet.in.</p><p><strong>Rules:</strong> Nudity, sexually explicit content, harassment, hate speech, spam, and sharing private personal data are strictly prohibited.</p>'
+                body: '<p><strong>1. Eligibility (18+):</strong> By accessing strangermeet.in, you confirm that you are at least 18 years of age.</p><p><strong>2. Acceptable Use:</strong> Users must behave respectfully. Nudity, sexually explicit media, harassment, hate speech, impersonation, automated bots, and unsolicited advertisements are strictly prohibited.</p><p><strong>3. Disclaimer:</strong> Conversations occur directly between independent users. StrangerMeet reserves the right to block abusive sessions and is not liable for user-generated content.</p>'
             },
             contact: {
                 title: 'Contact Us',
-                body: '<p>For support, feedback, or safety reports regarding <strong>strangermeet.in</strong>, email us at:</p><p class="font-semibold text-blue-600">gaurav14101997@gmail.com</p><p>We typically respond within 24–48 hours.</p>'
+                body: '<p>Have questions, feedback, partnership inquiries, or want to report a safety issue on <strong>strangermeet.in</strong>?</p><p>Reach out to our team directly via email:</p><p class="font-semibold text-blue-600">gaurav14101997@gmail.com</p><p>We review all inquiries and respond within 24–48 business hours.</p>'
             }
         };
         function openLegal(type) {
@@ -445,13 +580,13 @@
             document.getElementById('legalModal').classList.add('hidden');
             document.getElementById('legalModal').classList.remove('flex');
         }
-        setInterval(() => {
-            document.querySelectorAll('body > div:last-of-type, a[href*="netlify"]').forEach(el => {
-                if (el.shadowRoot || (el.innerText && el.innerText.includes('Netlify'))) {
-                    el.remove();
-                }
-            });
-        }, 200);
+        function acceptCookies() {
+            localStorage.setItem('sm_cookies_accepted', '1');
+            document.getElementById('cookie-banner').classList.add('hidden');
+        }
+        if (!localStorage.getItem('sm_cookies_accepted')) {
+            document.getElementById('cookie-banner').classList.remove('hidden');
+        }
     </script>
 
     <!-- FIREBASE + FRIENDS + UNFRIEND + WEBRTC APP LOGIC -->
@@ -710,7 +845,6 @@
             if (!confirm(`Remove ${friendName} from your friends list?`)) return;
 
             try {
-                // Remove from both users' friend lists
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_friends', currentUser.uid, 'list', friendUid));
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_friends', friendUid, 'list', currentUser.uid)).catch(() => {});
 
@@ -894,7 +1028,7 @@
         };
 
         // ==========================================
-        // RANDOM MATCHMAKING LOGIC (WITH LIMIT(10))
+        // RANDOM MATCHMAKING LOGIC
         // ==========================================
         window.startMatching = async () => {
             const ageOk = document.getElementById('age-confirm').checked;
