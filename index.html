@@ -211,7 +211,7 @@
             </div>
         </section>
 
-        <!-- VIEW 2: ACTIVE CHAT BOX (MOBILE-FIXED HEADER + LAST SEEN + TIMESTAMPS) -->
+        <!-- VIEW 2: ACTIVE CHAT BOX (COMPACT MOBILE LAST SEEN + TIMESTAMPS) -->
         <section id="chat-view" class="hidden w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex-col overflow-hidden">
             
             <div class="px-2.5 sm:px-4 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-1.5 flex-shrink-0">
@@ -579,7 +579,7 @@
         }
     </script>
 
-    <!-- FIREBASE + PRESENCE (LAST SEEN) + TIMESTAMPS + FRIENDS + WEBRTC LOGIC -->
+    <!-- FIREBASE + PRESENCE (COMPACT LAST SEEN) + TIMESTAMPS + FRIENDS + WEBRTC LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -726,7 +726,7 @@
         }
 
         // ==========================================
-        // TIME FORMATTING HELPERS (CHAT TIME + LAST SEEN)
+        // TIME FORMATTING HELPERS (COMPACT FOR MOBILE)
         // ==========================================
         function formatChatTime(ts) {
             if (!ts) return '';
@@ -738,7 +738,6 @@
             if (!presenceData || !presenceData.lastSeen) return 'Offline';
             const now = Date.now();
             const diff = now - presenceData.lastSeen;
-            // Consider user online if active within last 65 seconds and not marked offline
             if (presenceData.online && diff < 65000) {
                 return 'Online';
             }
@@ -750,9 +749,9 @@
             const isYesterday = d.toDateString() === yesterday.toDateString();
 
             const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-            if (isToday) return `Last seen today at ${timeStr}`;
-            if (isYesterday) return `Last seen yesterday at ${timeStr}`;
-            return `Last seen ${d.toLocaleDateString([], { day: 'numeric', month: 'short' })}, ${timeStr}`;
+            if (isToday) return `Seen ${timeStr}`;
+            if (isYesterday) return `Seen yesterday, ${timeStr}`;
+            return `Seen ${d.toLocaleDateString([], { day: 'numeric', month: 'short' })}, ${timeStr}`;
         }
 
         function isFriendOnline(presenceData) {
@@ -1491,7 +1490,6 @@
                 bubble.appendChild(p);
             }
 
-            // Message Timing Stamp (e.g., 12:30 PM)
             if (timestamp) {
                 const timeSpan = document.createElement('span');
                 timeSpan.className = isMe
