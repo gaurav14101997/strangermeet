@@ -79,7 +79,7 @@
         </div>
 
         <div class="flex items-center gap-2 sm:gap-2.5">
-            <!-- Live Badge (Hidden on mobile so header stays clean) -->
+            <!-- Live Badge (Hidden on mobile) -->
             <div class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span id="online-count-text">Live • 1-on-1 Chat</span>
@@ -226,6 +226,11 @@
                         <i data-lucide="video" class="w-4 h-4"></i>
                     </button>
 
+                    <!-- Unfriend Button (Only active for connected Friends) -->
+                    <button onclick="unfriendCurrentPartner()" id="unfriend-header-btn" class="hidden p-2 rounded-lg bg-red-50 dark:bg-red-950/60 hover:bg-red-100 text-red-600 dark:text-red-400 transition-colors" title="Unfriend">
+                        <i data-lucide="user-minus" class="w-4 h-4"></i>
+                    </button>
+
                     <button onclick="openReportModal()" id="report-btn" disabled title="Report" class="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40">
                         <i data-lucide="flag" class="w-4 h-4"></i>
                     </button>
@@ -336,7 +341,7 @@
             <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
                 <div>
                     <h3 class="text-base font-bold text-gray-900 dark:text-white">My Friends</h3>
-                    <p class="text-xs text-gray-500">Chat or make free Voice & Video calls</p>
+                    <p class="text-xs text-gray-500">Chat, call, or unfriend anytime</p>
                 </div>
                 <button type="button" onclick="closeFriendsModal()" class="text-gray-400 hover:text-gray-700 text-xl font-bold">&times;</button>
             </div>
@@ -356,18 +361,15 @@
             <span id="call-timer" class="text-xs font-mono bg-white/10 px-3 py-1 rounded-full">00:00</span>
         </div>
 
-        <!-- Video Streams Container -->
         <div class="relative w-full max-w-3xl flex-1 my-4 rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 flex items-center justify-center">
             <video id="remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
             <div id="audio-only-avatar" class="hidden flex-col items-center gap-3">
                 <div id="call-avatar-circle" class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-3xl font-bold shadow-lg">F</div>
                 <p class="text-sm text-gray-300">Voice Call Active</p>
             </div>
-            <!-- Local Picture-in-Picture Video -->
             <video id="local-video" autoplay muted playsinline class="w-28 sm:w-36 h-36 sm:h-48 object-cover rounded-xl border-2 border-white/30 shadow-lg absolute bottom-3 right-3 bg-gray-800"></video>
         </div>
 
-        <!-- Call Controls -->
         <div class="flex items-center gap-4 pb-2">
             <button id="toggle-mic-btn" onclick="toggleCallMic()" class="p-3.5 rounded-full bg-white/15 hover:bg-white/25 transition-colors" title="Mute / Unmute Mic">
                 <i id="call-mic-icon" data-lucide="mic" class="w-5 h-5"></i>
@@ -452,11 +454,11 @@
         }, 200);
     </script>
 
-    <!-- FIREBASE + FRIENDS + WEBRTC APP LOGIC -->
+    <!-- FIREBASE + FRIENDS + UNFRIEND + WEBRTC APP LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, addDoc, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const defaultFirebaseConfig = {
             apiKey: "AIzaSyBN2zAmTvQDdmzO1QAxmM72nI-KoUWlN4U",
@@ -485,12 +487,12 @@
             alias: localStorage.getItem('sm_alias') || 'Stranger',
             interests: [],
             soundEnabled: true,
-            status: 'lobby', // lobby | searching | connected | friend_chat | disconnected
+            status: 'lobby',
             roomId: null,
             partnerUid: null,
             partnerName: 'Stranger',
             isFriendChat: false,
-            friendsMap: {}, // uid -> { uid, name, addedAt }
+            friendsMap: {},
             renderedMsgIds: new Set(),
             unsubRoom: null,
             unsubMessages: null,
@@ -498,13 +500,12 @@
             unsubIncomingCalls: null
         };
 
-        // WebRTC State
         const rtcState = {
             pc: null,
             localStream: null,
             remoteStream: null,
             callId: null,
-            callType: 'video', // 'audio' | 'video'
+            callType: 'video',
             incomingCallData: null,
             unsubCallDoc: null,
             unsubCandidates: null,
@@ -596,7 +597,6 @@
             } catch (e) {}
         }
 
-        // Boot Firebase & Persistent Listeners (Friends + Incoming Calls)
         async function boot() {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -622,7 +622,7 @@
         boot();
 
         // ==========================================
-        // FRIENDS LIST & MUTUAL REQUEST SYSTEM
+        // FRIENDS LIST, UNFRIEND & MUTUAL REQUESTS
         // ==========================================
         function listenToMyFriends() {
             const friendsCol = collection(db, 'artifacts', appId, 'public', 'data', 'user_friends', currentUser.uid, 'list');
@@ -647,7 +647,6 @@
                 badge.classList.add('hidden');
             }
 
-            // Lobby quick list
             const lobbyBox = document.getElementById('lobby-friends-box');
             const lobbyList = document.getElementById('lobby-friends-list');
             if (friends.length > 0) {
@@ -662,14 +661,13 @@
                 lobbyBox.classList.add('hidden');
             }
 
-            // Modal list
             const modalList = document.getElementById('friends-modal-list');
             if (friends.length === 0) {
                 modalList.innerHTML = `<p class="text-center text-xs text-gray-500 py-6">No friends added yet. Click "Add Friend" while chatting with someone!</p>`;
                 return;
             }
             modalList.innerHTML = friends.map(f => `
-                <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 gap-2">
                     <div class="flex items-center gap-2.5 min-w-0">
                         <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
                             ${escapeHtml((f.name || 'F').charAt(0).toUpperCase())}
@@ -679,13 +677,16 @@
                             <p class="text-[11px] text-emerald-600 dark:text-emerald-400">Connected Friend</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <div class="flex items-center gap-1 flex-shrink-0">
                         <button onclick="openFriendChat('${escapeHtml(f.uid)}')" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold">Chat</button>
                         <button onclick="initiateFriendCall('${escapeHtml(f.uid)}', 'audio')" class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200" title="Voice Call">
                             <i data-lucide="phone" class="w-4 h-4"></i>
                         </button>
                         <button onclick="initiateFriendCall('${escapeHtml(f.uid)}', 'video')" class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200" title="Video Call">
                             <i data-lucide="video" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="unfriendUser('${escapeHtml(f.uid)}')" class="p-2 rounded-lg bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 hover:bg-red-200" title="Unfriend">
+                            <i data-lucide="user-minus" class="w-4 h-4"></i>
                         </button>
                     </div>
                 </div>
@@ -703,10 +704,43 @@
             document.getElementById('friends-modal').classList.remove('flex');
         };
 
+        window.unfriendUser = async (friendUid) => {
+            if (!useFirebase || !currentUser || !friendUid) return;
+            const friendName = (state.friendsMap[friendUid] && state.friendsMap[friendUid].name) || 'this friend';
+            if (!confirm(`Remove ${friendName} from your friends list?`)) return;
+
+            try {
+                // Remove from both users' friend lists
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_friends', currentUser.uid, 'list', friendUid));
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_friends', friendUid, 'list', currentUser.uid)).catch(() => {});
+
+                showToast(`${friendName} unfriended`);
+
+                if (state.partnerUid === friendUid) {
+                    document.getElementById('add-friend-text').textContent = 'Add Friend';
+                    document.getElementById('add-friend-btn').disabled = false;
+                    appendSystemBanner(`You unfriended ${friendName}.`);
+                    if (state.isFriendChat) {
+                        leaveToLobby();
+                    }
+                }
+            } catch (err) {
+                console.error('Unfriend error:', err);
+                showToast('Could not unfriend right now');
+            }
+        };
+
+        window.unfriendCurrentPartner = async () => {
+            if (state.partnerUid) {
+                await unfriendUser(state.partnerUid);
+            }
+        };
+
         function updateChatHeaderActionButtons() {
             const addBtn = document.getElementById('add-friend-btn');
             const voiceBtn = document.getElementById('voice-call-btn');
             const videoBtn = document.getElementById('video-call-btn');
+            const unfriendBtn = document.getElementById('unfriend-header-btn');
             const friendBadge = document.getElementById('friend-badge');
 
             const isConnectedActive = (state.status === 'connected' || state.status === 'friend_chat') && state.partnerUid;
@@ -715,6 +749,7 @@
                 addBtn.classList.remove('flex');
                 voiceBtn.classList.add('hidden');
                 videoBtn.classList.add('hidden');
+                unfriendBtn.classList.add('hidden');
                 friendBadge.classList.add('hidden');
                 return;
             }
@@ -725,14 +760,17 @@
                 addBtn.classList.remove('flex');
                 voiceBtn.classList.remove('hidden');
                 videoBtn.classList.remove('hidden');
+                unfriendBtn.classList.remove('hidden');
                 friendBadge.classList.remove('hidden');
             } else {
                 addBtn.classList.remove('hidden');
                 addBtn.classList.add('flex');
                 voiceBtn.classList.add('hidden');
                 videoBtn.classList.add('hidden');
+                unfriendBtn.classList.add('hidden');
                 friendBadge.classList.add('hidden');
             }
+            lucide.createIcons();
         }
 
         window.handleAddFriendClick = async () => {
@@ -764,7 +802,6 @@
             document.getElementById('friend-request-banner').classList.add('hidden');
             try {
                 const now = Date.now();
-                // Save mutual friendship in both users' friend lists
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_friends', currentUser.uid, 'list', state.partnerUid), {
                     name: state.partnerName,
                     addedAt: now
@@ -792,7 +829,6 @@
             }).catch(() => {});
         };
 
-        // Direct Friend Chat Room (Deterministic Room ID for two friends)
         function getFriendRoomId(uid1, uid2) {
             return uid1 < uid2 ? `friend_${uid1}_${uid2}` : `friend_${uid2}_${uid1}`;
         }
@@ -847,7 +883,6 @@
             updateChatHeaderActionButtons();
             appendSystemBanner(`Direct chat with ${state.partnerName}`);
 
-            // Ensure room doc exists
             const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', fRoomId);
             await setDoc(roomRef, {
                 users: [currentUser.uid, friendUid],
@@ -859,7 +894,7 @@
         };
 
         // ==========================================
-        // RANDOM MATCHMAKING LOGIC
+        // RANDOM MATCHMAKING LOGIC (WITH LIMIT(10))
         // ==========================================
         window.startMatching = async () => {
             const ageOk = document.getElementById('age-confirm').checked;
@@ -921,13 +956,14 @@
             const queueCol = collection(db, 'artifacts', appId, 'public', 'data', 'match_queue');
 
             try {
-                const snap = await getDocs(queueCol);
+                const q = query(queueCol, where('status', '==', 'waiting'), limit(10));
+                const snap = await getDocs(q);
                 let matchedDoc = null;
                 const now = Date.now();
 
                 snap.forEach(d => {
                     const data = d.data();
-                    if (d.id !== uid && data.status === 'waiting' && (now - (data.createdAt || 0) < 30000)) {
+                    if (d.id !== uid && (now - (data.createdAt || 0) < 30000)) {
                         if (!matchedDoc) matchedDoc = { id: d.id, ...data };
                     }
                 });
@@ -1025,13 +1061,11 @@
             appendSystemBanner(`You're now chatting with ${partnerName}. Say hi!`);
             playChime('match');
 
-            // Watch room status & Friend Requests
             const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', roomId);
             state.unsubRoom = onSnapshot(roomRef, (snap) => {
                 if (!snap.exists()) return;
                 const data = snap.data();
 
-                // Handle Friend Request states
                 if (data.friendRequest) {
                     const req = data.friendRequest;
                     if (req.status === 'pending' && req.to === currentUser.uid) {
