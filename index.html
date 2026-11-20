@@ -15,33 +15,33 @@
     <meta name="keywords" content="strangermeet, talk to strangers, anonymous chat, free random chat india, 1 on 1 chat, stranger video call">
     <meta name="author" content="StrangerMeet">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://strangermeet.in/">
+    <link rel="canonical" href="[https://strangermeet.in/](https://strangermeet.in/)">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="StrangerMeet">
     <meta property="og:title" content="StrangerMeet — Talk to Strangers & Make Friends">
     <meta property="og:description" content="Instant 1-on-1 random chat with interest matching, photo sharing, friend lists, and free voice/video calls.">
-    <meta property="og:url" content="https://strangermeet.in/">
-    <meta property="og:image" content="https://strangermeet.in/favicon.svg">
+    <meta property="og:url" content="[https://strangermeet.in/](https://strangermeet.in/)">
+    <meta property="og:image" content="[https://strangermeet.in/favicon.svg](https://strangermeet.in/favicon.svg)">
 
     <!-- Structured Data (Schema.org) for Google Search -->
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
+      "@context": "[https://schema.org](https://schema.org)",
       "@type": "WebSite",
       "name": "StrangerMeet",
       "alternateName": "strangermeet.in",
-      "url": "https://strangermeet.in/",
+      "url": "[https://strangermeet.in/](https://strangermeet.in/)",
       "description": "Free anonymous 1-on-1 random chat platform with interest matching, friend connections, and peer-to-peer voice and video calls."
     }
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
+    <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap)" rel="stylesheet">
+    <script src="[https://unpkg.com/lucide@latest](https://unpkg.com/lucide@latest)"></script>
+    <script src="[https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js](https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js)"></script>
 
     <script>
         tailwind.config = {
@@ -211,7 +211,7 @@
             </div>
         </section>
 
-        <!-- VIEW 2: ACTIVE CHAT BOX (COMPACT MOBILE LAST SEEN + TIMESTAMPS) -->
+        <!-- VIEW 2: ACTIVE CHAT BOX (SPARK-FREE AUTO-CLEANUP + LAST SEEN + TIMESTAMPS) -->
         <section id="chat-view" class="hidden w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex-col overflow-hidden">
             
             <div class="px-2.5 sm:px-4 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-1.5 flex-shrink-0">
@@ -549,7 +549,7 @@
             },
             privacy: {
                 title: 'Privacy Policy',
-                body: '<p><strong>1. Information We Collect:</strong> StrangerMeet does not require registration, email addresses, or phone numbers. We use Firebase Anonymous Authentication to assign a temporary browser identifier so your saved friends list remains available on your device.</p><p><strong>2. Messages & WebRTC Calls:</strong> Text and image messages are transmitted via Google Cloud Firestore. Voice and video calls between mutually accepted friends use direct peer-to-peer WebRTC encryption and are never recorded or stored on our servers.</p><p><strong>3. Advertising & Cookies:</strong> We partner with third-party advertising networks such as <strong>Google AdSense</strong>, which may use cookies or web beacons to serve relevant advertisements based on your visits. You may opt out of personalized advertising by visiting <a href="https://adssettings.google.com" target="_blank" rel="noopener" class="text-blue-600 underline">Google Ads Settings</a>.</p>'
+                body: '<p><strong>1. Information We Collect:</strong> StrangerMeet does not require registration, email addresses, or phone numbers. We use Firebase Anonymous Authentication to assign a temporary browser identifier so your saved friends list remains available on your device.</p><p><strong>2. Messages & WebRTC Calls:</strong> Text and image messages are transmitted via Google Cloud Firestore. Voice and video calls between mutually accepted friends use direct peer-to-peer WebRTC encryption and are never recorded or stored on our servers.</p><p><strong>3. Advertising & Cookies:</strong> We partner with third-party advertising networks such as <strong>Google AdSense</strong>, which may use cookies or web beacons to serve relevant advertisements based on your visits. You may opt out of personalized advertising by visiting <a href="[https://adssettings.google.com](https://adssettings.google.com)" target="_blank" rel="noopener" class="text-blue-600 underline">Google Ads Settings</a>.</p>'
             },
             terms: {
                 title: 'Terms & Conditions',
@@ -579,11 +579,11 @@
         }
     </script>
 
-    <!-- FIREBASE + PRESENCE (COMPACT LAST SEEN) + TIMESTAMPS + FRIENDS + WEBRTC LOGIC -->
+    <!-- FIREBASE + SPARK-FREE AUTO-JANITOR (24H + 50-MSG) + PRESENCE + FRIENDS + WEBRTC LOGIC -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, addDoc, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js)";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js)";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, addDoc, getDocs, query, where, limit } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js)";
 
         const defaultFirebaseConfig = {
             apiKey: "AIzaSyBN2zAmTvQDdmzO1QAxmM72nI-KoUWlN4U",
@@ -596,6 +596,9 @@
         };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'strangermeet-d15c0';
+        const MAX_ROOM_MESSAGES = 50;
+        const MESSAGE_TTL_MS = 24 * 60 * 60 * 1000;
+
         let firebaseConfig = defaultFirebaseConfig;
         try {
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
@@ -725,9 +728,6 @@
             } catch (e) {}
         }
 
-        // ==========================================
-        // TIME FORMATTING HELPERS (COMPACT FOR MOBILE)
-        // ==========================================
         function formatChatTime(ts) {
             if (!ts) return '';
             const d = new Date(ts);
@@ -759,9 +759,43 @@
             return Boolean(presenceData.online && (Date.now() - presenceData.lastSeen < 65000));
         }
 
-        // ==========================================
-        // USER PRESENCE (ONLINE / LAST SEEN TRACKER)
-        // ==========================================
+        // Spark-Free Background Garbage Collector (deletes >24h inactive rooms, messages, stale queue & old calls)
+        async function runBackgroundGarbageCollector() {
+            if (!useFirebase || !currentUser) return;
+            const now = Date.now();
+            const cutoff24h = now - MESSAGE_TTL_MS;
+
+            try {
+                const roomsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat_rooms');
+                const oldRoomsQ = query(roomsCol, where('lastActivity', '<', cutoff24h), limit(5));
+                const oldRoomsSnap = await getDocs(oldRoomsQ);
+
+                for (const roomDoc of oldRoomsSnap.docs) {
+                    const msgsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', roomDoc.id, 'messages');
+                    const msgsSnap = await getDocs(msgsCol);
+                    const msgDeletes = [];
+                    msgsSnap.forEach(m => msgDeletes.push(deleteDoc(m.ref).catch(() => {})));
+                    await Promise.all(msgDeletes);
+
+                    if (!roomDoc.data().isFriendRoom) {
+                        await deleteDoc(roomDoc.ref).catch(() => {});
+                    } else {
+                        await updateDoc(roomDoc.ref, { lastActivity: now }).catch(() => {});
+                    }
+                }
+
+                const queueCol = collection(db, 'artifacts', appId, 'public', 'data', 'match_queue');
+                const oldQueueQ = query(queueCol, where('createdAt', '<', now - 120000), limit(5));
+                const oldQueueSnap = await getDocs(oldQueueQ);
+                oldQueueSnap.forEach(qDoc => deleteDoc(qDoc.ref).catch(() => {}));
+
+                const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
+                const oldCallsQ = query(callsCol, where('createdAt', '<', now - 3600000), limit(5));
+                const oldCallsSnap = await getDocs(oldCallsQ);
+                oldCallsSnap.forEach(cDoc => deleteDoc(cDoc.ref).catch(() => {}));
+            } catch (e) {}
+        }
+
         async function updateMyPresence(isOnline = true) {
             if (!useFirebase || !currentUser) return;
             try {
@@ -856,6 +890,7 @@
                     startPresenceTracking();
                     listenToMyFriends();
                     listenToIncomingCalls();
+                    setTimeout(runBackgroundGarbageCollector, 3000);
                 }
             } catch (err) {
                 console.warn('Firebase init warning:', err);
@@ -864,9 +899,6 @@
         }
         boot();
 
-        // ==========================================
-        // FRIENDS LIST, UNFRIEND & MUTUAL REQUESTS
-        // ==========================================
         function listenToMyFriends() {
             const friendsCol = collection(db, 'artifacts', appId, 'public', 'data', 'user_friends', currentUser.uid, 'list');
             state.unsubFriends = onSnapshot(friendsCol, (snap) => {
@@ -960,6 +992,17 @@
             document.getElementById('friends-modal').classList.remove('flex');
         };
 
+        async function purgeRoomMessages(roomId) {
+            if (!useFirebase || !roomId) return;
+            try {
+                const msgsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', roomId, 'messages');
+                const snap = await getDocs(msgsCol);
+                const deletes = [];
+                snap.forEach(d => deletes.push(deleteDoc(d.ref).catch(() => {})));
+                await Promise.all(deletes);
+            } catch (e) {}
+        }
+
         window.unfriendUser = async (friendUid) => {
             if (!useFirebase || !currentUser || !friendUid) return;
             const friendName = (state.friendsMap[friendUid] && state.friendsMap[friendUid].name) || 'this friend';
@@ -968,6 +1011,10 @@
             try {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_friends', currentUser.uid, 'list', friendUid));
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_friends', friendUid, 'list', currentUser.uid)).catch(() => {});
+
+                const fRoomId = getFriendRoomId(currentUser.uid, friendUid);
+                await purgeRoomMessages(fRoomId);
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', fRoomId)).catch(() => {});
 
                 showToast(`${friendName} unfriended`);
 
@@ -1137,21 +1184,19 @@
             document.getElementById('next-btn').textContent = 'Random Chat';
 
             updateChatHeaderActionButtons();
-            appendSystemBanner(`Direct chat with ${state.partnerName}`);
+            appendSystemBanner(`Direct chat with ${state.partnerName} (auto-clears after 24h)`);
 
             const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', fRoomId);
             await setDoc(roomRef, {
                 users: [currentUser.uid, friendUid],
                 isFriendRoom: true,
-                active: true
+                active: true,
+                lastActivity: Date.now()
             }, { merge: true });
 
             subscribeToMessages(fRoomId);
         };
 
-        // ==========================================
-        // RANDOM MATCHMAKING LOGIC
-        // ==========================================
         window.startMatching = async () => {
             const ageOk = document.getElementById('age-confirm').checked;
             if (!ageOk) {
@@ -1245,7 +1290,8 @@
                             [uid]: state.interests
                         },
                         active: true,
-                        createdAt: now
+                        createdAt: now,
+                        lastActivity: now
                     });
 
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'match_queue', matchedDoc.id), {
@@ -1355,11 +1401,29 @@
         function subscribeToMessages(roomId) {
             const msgsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', roomId, 'messages');
             state.unsubMessages = onSnapshot(msgsCol, (snap) => {
-                const msgs = [];
-                snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
-                msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                const now = Date.now();
+                const validMsgs = [];
+                const expiredRefs = [];
 
-                msgs.forEach(m => {
+                snap.forEach(d => {
+                    const data = d.data();
+                    const age = now - (data.timestamp || 0);
+                    if (age > MESSAGE_TTL_MS) {
+                        expiredRefs.push(d.ref);
+                    } else {
+                        validMsgs.push({ id: d.id, ref: d.ref, ...data });
+                    }
+                });
+
+                expiredRefs.forEach(ref => deleteDoc(ref).catch(() => {}));
+                validMsgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                if (validMsgs.length > MAX_ROOM_MESSAGES) {
+                    const excess = validMsgs.splice(0, validMsgs.length - MAX_ROOM_MESSAGES);
+                    excess.forEach(m => deleteDoc(m.ref).catch(() => {}));
+                }
+
+                validMsgs.forEach(m => {
                     if (!state.renderedMsgIds.has(m.id)) {
                         state.renderedMsgIds.add(m.id);
                         const isMe = currentUser && m.senderId === currentUser.uid;
@@ -1370,9 +1434,6 @@
             }, (err) => console.error(err));
         }
 
-        // ==========================================
-        // MESSAGING & PHOTO SHARING (WITH TIMESTAMPS)
-        // ==========================================
         window.handleSendMessage = async (e) => {
             if (e) e.preventDefault();
             const input = document.getElementById('message-input');
@@ -1409,7 +1470,7 @@
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = async () => {
-                    const maxDim = 650;
+                    const maxDim = 500;
                     let w = img.width;
                     let h = img.height;
                     if (w > maxDim || h > maxDim) {
@@ -1425,7 +1486,7 @@
                     canvas.width = w;
                     canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.62);
 
                     document.getElementById('icebreakers-bar').classList.add('hidden');
                     await dispatchMessage('', compressedDataUrl);
@@ -1438,13 +1499,17 @@
         async function dispatchMessage(text, imageData) {
             if (useFirebase && currentUser && state.roomId) {
                 try {
+                    const now = Date.now();
                     const msgsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId, 'messages');
                     await addDoc(msgsCol, {
                         senderId: currentUser.uid,
                         text: text || '',
                         imageData: imageData || null,
-                        timestamp: Date.now()
+                        timestamp: now
                     });
+                    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId), {
+                        lastActivity: now
+                    }).catch(() => {});
                 } catch (err) {
                     showToast('Failed to send message');
                 }
@@ -1505,9 +1570,6 @@
             stream.scrollTop = stream.scrollHeight;
         }
 
-        // ==========================================
-        // WEBRTC VOICE & VIDEO CALLING (FRIENDS ONLY)
-        // ==========================================
         function listenToIncomingCalls() {
             const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
             const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'));
@@ -1783,9 +1845,6 @@
             modal.classList.remove('flex');
         };
 
-        // ==========================================
-        // NAVIGATION & CLEANUP
-        // ==========================================
         window.handleNextAction = async () => {
             if (state.status === 'searching') {
                 leaveToLobby();
@@ -1827,9 +1886,8 @@
             if (useFirebase && currentUser) {
                 deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'match_queue', currentUser.uid)).catch(() => {});
                 if (state.roomId && !state.isFriendChat) {
-                    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId), {
-                        active: false
-                    }).catch(() => {});
+                    purgeRoomMessages(state.roomId);
+                    deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId)).catch(() => {});
                 }
             }
         }
