@@ -4,23 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StrangerMeet — Talk to Strangers</title>
-    <!-- Site Logo / Favicon (Google Search & Browser Tab ke liye) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232563EB'/%3E%3Cstop offset='100%25' stop-color='%234F46E5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='96' height='96' rx='24' fill='url(%23g)'/%3E%3Cpath d='M28 32h40a8 8 0 0 1 8 8v20a8 8 0 0 1-8 8H44l-12 10v-10h-4a8 8 0 0 1-8-8V40a8 8 0 0 1 8-8z' fill='%23ffffff'/%3E%3Ccircle cx='39' cy='50' r='4' fill='%232563EB'/%3E%3Ccircle cx='48' cy='50' r='4' fill='%232563EB'/%3E%3Ccircle cx='57' cy='50' r='4' fill='%232563EB'/%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='24' fill='%232563EB'/%3E%3Cpath d='M28 32h40a8 8 0 0 1 8 8v20a8 8 0 0 1-8 8H44l-12 10v-10h-4a8 8 0 0 1-8-8V40a8 8 0 0 1 8-8z' fill='%23ffffff'/%3E%3C/svg%3E">
-    <!-- Google Search & SEO Meta Tags -->
-    <meta name="description" content="Talk to strangers instantly on StrangerMeet. Simple, free, anonymous 1-on-1 random chat with photo sharing.">
+    <meta name="description" content="Talk to strangers instantly on StrangerMeet. Simple, free, anonymous 1-on-1 random chat with photo sharing, friends, and voice/video calls.">
     <meta name="keywords" content="stranger chat, talk to strangers, omegle alternative, anonymous chat, random chat online">
     <meta name="robots" content="index, follow">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Tone.js for subtle match/message chimes -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
     <script>
@@ -63,7 +57,7 @@
             40% { transform: scale(1); opacity: 1; }
         }
         @media (max-width: 768px) {
-            [class*="bottom-0"], [class*="fixed"]:not(#legalModal):not(#image-modal):not(#report-modal) {
+            [class*="bottom-0"], [class*="fixed"]:not(#legalModal):not(#image-modal):not(#report-modal):not(#friends-modal):not(#call-modal):not(#incoming-call-banner) {
                 bottom: 56px !important;
             }
         }
@@ -74,21 +68,29 @@
 </head>
 <body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans antialiased w-full">
 
-    <!-- SIMPLE CLEAN TOP BAR -->
+    <!-- TOP BAR -->
     <header class="h-14 px-4 sm:px-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between flex-shrink-0">
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="leaveToLobby()">
             <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-base">
                 S
             </div>
             <span class="font-bold text-lg tracking-tight text-gray-900 dark:text-white">StrangerMeet</span>
-            <span class="hidden sm:inline text-xs text-gray-500 dark:text-gray-400">• Talk to strangers!</span>
+            <span class="hidden md:inline text-xs text-gray-500 dark:text-gray-400">• Talk to strangers!</span>
         </div>
 
-        <div class="flex items-center gap-2 sm:gap-3">
-            <div class="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full">
+        <div class="flex items-center gap-2 sm:gap-2.5">
+            <!-- Live Badge (Hidden on mobile so header stays clean) -->
+            <div class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span id="online-count-text">Live • 1-on-1 Chat</span>
             </div>
+
+            <!-- Friends Drawer Button -->
+            <button id="friends-btn" onclick="openFriendsModal()" title="My Friends" class="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors">
+                <i data-lucide="users" class="w-4 h-4"></i>
+                <span>Friends</span>
+                <span id="friends-count-badge" class="hidden px-1.5 py-0.2 rounded-full bg-blue-600 text-white text-[10px]">0</span>
+            </button>
 
             <button id="sound-toggle" onclick="toggleSound()" title="Mute/Unmute" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
                 <i id="sound-icon" data-lucide="volume-2" class="w-4 h-4"></i>
@@ -101,11 +103,32 @@
         </div>
     </header>
 
+    <!-- INCOMING CALL BANNER -->
+    <div id="incoming-call-banner" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-gray-900 dark:bg-gray-800 text-white rounded-2xl p-4 shadow-2xl border border-blue-500/40 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-base animate-pulse flex-shrink-0">
+                <i data-lucide="phone-incoming" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0">
+                <p id="incoming-caller-name" class="font-semibold text-sm truncate">Friend calling...</p>
+                <p id="incoming-call-type" class="text-xs text-blue-300">Incoming Video Call</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <button onclick="declineIncomingCall()" class="p-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white" title="Decline">
+                <i data-lucide="phone-off" class="w-4 h-4"></i>
+            </button>
+            <button onclick="acceptIncomingCall()" class="p-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white" title="Accept">
+                <i data-lucide="phone" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- MAIN CONTENT -->
     <main class="flex-1 flex items-center justify-center p-3 sm:p-6">
 
         <!-- ========================================== -->
-        <!-- VIEW 1: SIMPLE & CLEAN START SCREEN        -->
+        <!-- VIEW 1: START SCREEN                       -->
         <!-- ========================================== -->
         <section id="lobby-view" class="w-full max-w-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm p-6 sm:p-8 my-auto">
             <div class="text-center mb-6">
@@ -113,12 +136,11 @@
                     Talk to Strangers
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5">
-                    Simple, free & anonymous 1-on-1 chat. No sign-up needed.
+                    Simple, free & anonymous 1-on-1 chat. Add friends & call anytime.
                 </p>
             </div>
 
             <div class="space-y-4">
-                <!-- Optional Name -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
                         Your Name (Optional)
@@ -127,7 +149,6 @@
                            class="w-full px-3.5 py-2.5 text-base sm:text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-600">
                 </div>
 
-                <!-- Optional Interests -->
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">
@@ -147,46 +168,81 @@
                     </div>
                 </div>
 
-                <!-- Simple 18+ Checkbox -->
                 <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 pt-1 cursor-pointer select-none">
                     <input type="checkbox" id="age-confirm" checked class="w-4 h-4 rounded accent-blue-600">
                     <span>I am 18+ and agree to keep the chat respectful.</span>
                 </label>
 
-                <!-- Simple Solid Blue Start Button -->
                 <button onclick="startMatching()" class="w-full py-3.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-semibold text-base transition-colors">
-                    Start Chat
+                    Start Random Chat
                 </button>
+
+                <!-- Quick Saved Friends Preview on Lobby -->
+                <div id="lobby-friends-box" class="hidden pt-3 border-t border-gray-200 dark:border-gray-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">Saved Friends</span>
+                        <button type="button" onclick="openFriendsModal()" class="text-xs text-blue-600 hover:underline">View all</button>
+                    </div>
+                    <div id="lobby-friends-list" class="flex flex-wrap gap-2"></div>
+                </div>
             </div>
         </section>
 
         <!-- ========================================== -->
-        <!-- VIEW 2: SIMPLE & CLEAN CHAT BOX            -->
+        <!-- VIEW 2: CHAT BOX (RANDOM + FRIEND CHAT)    -->
         <!-- ========================================== -->
         <section id="chat-view" class="hidden w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex-col overflow-hidden">
             
             <!-- Chat Top Header -->
-            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-2 flex-shrink-0">
+            <div class="px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-2 flex-shrink-0">
                 <div class="flex items-center gap-2.5 min-w-0">
                     <div id="partner-avatar" class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                         ?
                     </div>
                     <div class="min-w-0">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1.5">
                             <h2 id="partner-name" class="font-semibold text-sm sm:text-base truncate">Searching...</h2>
                             <span id="match-badge" class="hidden text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">Online</span>
+                            <span id="friend-badge" class="hidden text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400">Friend</span>
                         </div>
                         <p id="shared-interests-label" class="text-xs text-gray-500 dark:text-gray-400 truncate">Looking for a stranger...</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-1.5 flex-shrink-0">
+                <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+                    <!-- Add Friend Button (Visible when chatting with non-friend stranger) -->
+                    <button onclick="handleAddFriendClick()" id="add-friend-btn" class="hidden items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 text-blue-600 dark:text-blue-400 text-xs font-semibold transition-colors" title="Add Friend">
+                        <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                        <span id="add-friend-text" class="hidden sm:inline">Add Friend</span>
+                    </button>
+
+                    <!-- Voice Call Button (Only active for connected Friends) -->
+                    <button onclick="startCall('audio')" id="voice-call-btn" class="hidden p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 transition-colors" title="Voice Call">
+                        <i data-lucide="phone" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- Video Call Button (Only active for connected Friends) -->
+                    <button onclick="startCall('video')" id="video-call-btn" class="hidden p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 transition-colors" title="Video Call">
+                        <i data-lucide="video" class="w-4 h-4"></i>
+                    </button>
+
                     <button onclick="openReportModal()" id="report-btn" disabled title="Report" class="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40">
                         <i data-lucide="flag" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="leaveToLobby()" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <button onclick="leaveToLobby()" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                         Exit
                     </button>
+                </div>
+            </div>
+
+            <!-- Incoming Friend Request Banner inside Chat -->
+            <div id="friend-request-banner" class="hidden px-4 py-2.5 bg-blue-50 dark:bg-blue-950/80 border-b border-blue-200 dark:border-blue-900 flex items-center justify-between gap-2 text-xs">
+                <span class="font-medium text-blue-900 dark:text-blue-200">
+                    <strong id="req-sender-name">Stranger</strong> sent you a Friend Request!
+                </span>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <button onclick="acceptFriendRequest()" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold">Accept</button>
+                    <button onclick="declineFriendRequest()" class="px-2.5 py-1 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-700">Ignore</button>
                 </div>
             </div>
 
@@ -218,7 +274,6 @@
 
             <!-- Bottom Input & Controls -->
             <div class="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 safe-bottom flex-shrink-0">
-                <!-- Quick Icebreakers -->
                 <div id="icebreakers-bar" class="hidden flex items-center gap-1.5 overflow-x-auto pb-2.5 text-xs">
                     <span class="text-gray-400 flex-shrink-0">Say:</span>
                     <button type="button" onclick="sendQuickText('Hey! Kaise ho? 👋')" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 whitespace-nowrap">Hey! Kaise ho? 👋</button>
@@ -226,23 +281,18 @@
                     <button type="button" onclick="sendQuickText('What are you doing right now?')" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 whitespace-nowrap">What are you doing?</button>
                 </div>
 
-                <!-- Hidden File Input for Photo Upload -->
                 <input type="file" id="photo-input" accept="image/*" class="hidden" onchange="handlePhotoSelected(event)">
 
-                <!-- Chat Control Bar -->
                 <div class="flex items-center gap-2">
-                    <!-- Next / Stop Button -->
                     <button id="next-btn" onclick="handleNextAction()" class="px-3.5 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 font-semibold text-xs sm:text-sm border border-red-200 dark:border-red-900 transition-colors flex-shrink-0">
                         Stop / Next
                     </button>
 
-                    <!-- Photo Upload Button -->
                     <button id="photo-btn" type="button" onclick="triggerPhotoPicker()" disabled title="Send a photo"
                             class="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 hover:text-blue-600 text-gray-600 dark:text-gray-300 disabled:opacity-40 transition-colors flex-shrink-0">
                         <i data-lucide="image-plus" class="w-5 h-5"></i>
                     </button>
 
-                    <!-- Message Input Box -->
                     <form onsubmit="handleSendMessage(event)" class="flex-1 flex items-center gap-2 min-w-0">
                         <input type="text" id="message-input" disabled autocomplete="off" placeholder="Type a message..." 
                                class="flex-1 min-w-0 px-3.5 py-2.5 text-base sm:text-sm bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-blue-600 focus:bg-white dark:focus:bg-gray-900 rounded-xl focus:outline-none disabled:opacity-50">
@@ -255,16 +305,16 @@
         </section>
     </main>
 
-    <!-- AdSense Compliance: Content + Legal Modals -->
+    <!-- AdSense Compliance Info + Footer -->
     <section id="adsense-info-section" class="max-w-3xl mx-auto px-4 py-8 text-slate-700 dark:text-slate-300 space-y-6">
         <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm space-y-4">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">How StrangerMeet Works</h2>
             <p class="text-sm leading-relaxed">
-                StrangerMeet (<strong>strangermeet.in</strong>) is a moderated, browser-based 1-on-1 text and photo chat platform for friendly conversations. No sign-up or personal profile is required.
+                StrangerMeet (<strong>strangermeet.in</strong>) is a moderated, browser-based 1-on-1 text, photo, and friend calling platform for friendly conversations. No sign-up or personal profile is required.
             </p>
             <div class="grid md:grid-cols-3 gap-4 pt-2 text-sm">
                 <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><strong class="block text-gray-900 dark:text-white mb-1">1. Pick Interests</strong>Add topics like music, gaming, or cricket to match with similar people.</div>
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><strong class="block text-gray-900 dark:text-white mb-1">2. Safe 1-on-1 Chat</strong>Instant private chat with built-in Report and Next/Exit buttons.</div>
+                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><strong class="block text-gray-900 dark:text-white mb-1">2. Add Friends & Call</strong>Send a mutual friend request during chat to unlock direct messages and free voice/video calls.</div>
                 <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"><strong class="block text-gray-900 dark:text-white mb-1">3. 18+ Community</strong>Strictly respectful conversations; spam or explicit content is banned.</div>
             </div>
         </div>
@@ -280,7 +330,58 @@
         </footer>
     </section>
 
-    <!-- LEGAL MODAL (ABOUT / PRIVACY / TERMS / CONTACT) -->
+    <!-- FRIENDS LIST MODAL -->
+    <div id="friends-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50" onclick="if(event.target===this)closeFriendsModal()">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full max-h-[80vh] flex flex-col overflow-hidden shadow-xl border border-gray-200 dark:border-gray-800">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                <div>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white">My Friends</h3>
+                    <p class="text-xs text-gray-500">Chat or make free Voice & Video calls</p>
+                </div>
+                <button type="button" onclick="closeFriendsModal()" class="text-gray-400 hover:text-gray-700 text-xl font-bold">&times;</button>
+            </div>
+            <div id="friends-modal-list" class="p-4 overflow-y-auto space-y-2.5 flex-1">
+                <p class="text-center text-xs text-gray-500 py-6">No friends added yet. Click "Add Friend" while chatting with someone!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- WEBRTC VOICE / VIDEO CALL MODAL -->
+    <div id="call-modal" class="fixed inset-0 bg-gray-950/95 hidden flex-col items-center justify-between p-4 sm:p-6 z-50 text-white">
+        <div class="w-full max-w-3xl flex items-center justify-between">
+            <div>
+                <h3 id="call-partner-name" class="font-bold text-base sm:text-lg">Friend</h3>
+                <p id="call-status-text" class="text-xs text-blue-400">Connecting...</p>
+            </div>
+            <span id="call-timer" class="text-xs font-mono bg-white/10 px-3 py-1 rounded-full">00:00</span>
+        </div>
+
+        <!-- Video Streams Container -->
+        <div class="relative w-full max-w-3xl flex-1 my-4 rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 flex items-center justify-center">
+            <video id="remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
+            <div id="audio-only-avatar" class="hidden flex-col items-center gap-3">
+                <div id="call-avatar-circle" class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-3xl font-bold shadow-lg">F</div>
+                <p class="text-sm text-gray-300">Voice Call Active</p>
+            </div>
+            <!-- Local Picture-in-Picture Video -->
+            <video id="local-video" autoplay muted playsinline class="w-28 sm:w-36 h-36 sm:h-48 object-cover rounded-xl border-2 border-white/30 shadow-lg absolute bottom-3 right-3 bg-gray-800"></video>
+        </div>
+
+        <!-- Call Controls -->
+        <div class="flex items-center gap-4 pb-2">
+            <button id="toggle-mic-btn" onclick="toggleCallMic()" class="p-3.5 rounded-full bg-white/15 hover:bg-white/25 transition-colors" title="Mute / Unmute Mic">
+                <i id="call-mic-icon" data-lucide="mic" class="w-5 h-5"></i>
+            </button>
+            <button id="toggle-cam-btn" onclick="toggleCallCam()" class="p-3.5 rounded-full bg-white/15 hover:bg-white/25 transition-colors" title="Camera On / Off">
+                <i id="call-cam-icon" data-lucide="video" class="w-5 h-5"></i>
+            </button>
+            <button onclick="endCall(true)" class="p-4 rounded-full bg-red-600 hover:bg-red-700 transition-colors shadow-lg" title="End Call">
+                <i data-lucide="phone-off" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- LEGAL MODAL -->
     <div id="legalModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50" onclick="if(event.target===this)closeLegal()">
         <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6 space-y-4 shadow-xl border border-gray-200 dark:border-gray-800">
             <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 pb-3">
@@ -291,7 +392,7 @@
         </div>
     </div>
 
-    <!-- IMAGE LIGHTBOX MODAL (ZOOM PHOTO) -->
+    <!-- IMAGE LIGHTBOX MODAL -->
     <div id="image-modal" onclick="closeImageModal()" class="fixed inset-0 z-50 hidden bg-black/85 flex items-center justify-center p-4 cursor-zoom-out">
         <img id="modal-preview-img" src="" alt="Full preview" class="max-w-full max-h-[88vh] rounded-xl shadow-2xl object-contain">
     </div>
@@ -312,20 +413,20 @@
     <!-- TOAST NOTIFICATION -->
     <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col gap-2"></div>
 
-    <!-- LEGAL & NETLIFY CLEANUP SCRIPT -->
+    <!-- LEGAL & CLEANUP SCRIPT -->
     <script>
         const legalContent = {
             about: {
                 title: 'About StrangerMeet',
-                body: '<p><strong>StrangerMeet (strangermeet.in)</strong> is a free, lightweight 1-on-1 random chat platform designed for friendly text and photo conversations without mandatory registration.</p><p>We prioritize user safety with an 18+ policy, instant partner switching, and quick reporting controls.</p>'
+                body: '<p><strong>StrangerMeet (strangermeet.in)</strong> is a free, lightweight 1-on-1 random chat platform designed for friendly text, photo, and friend voice/video conversations without mandatory registration.</p><p>We prioritize user safety with an 18+ policy, instant partner switching, and quick reporting controls.</p>'
             },
             privacy: {
                 title: 'Privacy Policy',
-                body: '<p><strong>Data & Chat:</strong> StrangerMeet does not require accounts or phone numbers. Real-time messages and images are transmitted via Google Firebase and are not publicly stored after a session ends.</p><p><strong>Cookies & Ads:</strong> We use basic browser storage and third-party advertising partners like <strong>Google AdSense</strong>, which may use cookies to serve relevant ads. You can manage ad preferences in Google Ads Settings.</p>'
+                body: '<p><strong>Data & Chat:</strong> StrangerMeet does not require accounts or phone numbers. Real-time messages and images are transmitted via Google Firebase. Voice and video calls between connected friends use encrypted peer-to-peer WebRTC.</p><p><strong>Cookies & Ads:</strong> We use basic browser storage and third-party advertising partners like <strong>Google AdSense</strong>, which may use cookies to serve relevant ads.</p>'
             },
             terms: {
                 title: 'Terms & Conditions',
-                body: '<p><strong>18+ Only:</strong> You must be at least 18 years old to use strangermeet.in.</p><p><strong>Rules:</strong> Nudity, sexually explicit content, harassment, hate speech, spam, and sharing private personal data are strictly prohibited. Users are responsible for their own messages and may be blocked for violations.</p>'
+                body: '<p><strong>18+ Only:</strong> You must be at least 18 years old to use strangermeet.in.</p><p><strong>Rules:</strong> Nudity, sexually explicit content, harassment, hate speech, spam, and sharing private personal data are strictly prohibited.</p>'
             },
             contact: {
                 title: 'Contact Us',
@@ -351,11 +452,11 @@
         }, 200);
     </script>
 
-    <!-- FIREBASE + APP LOGIC -->
+    <!-- FIREBASE + FRIENDS + WEBRTC APP LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const defaultFirebaseConfig = {
             apiKey: "AIzaSyBN2zAmTvQDdmzO1QAxmM72nI-KoUWlN4U",
@@ -381,80 +482,51 @@
         let useFirebase = false;
 
         const state = {
-            alias: 'Stranger',
+            alias: localStorage.getItem('sm_alias') || 'Stranger',
             interests: [],
             soundEnabled: true,
-            status: 'lobby',
+            status: 'lobby', // lobby | searching | connected | friend_chat | disconnected
             roomId: null,
+            partnerUid: null,
             partnerName: 'Stranger',
-            isBotSession: false,
-            botPersona: null,
-            botMsgCount: 0,
+            isFriendChat: false,
+            friendsMap: {}, // uid -> { uid, name, addedAt }
             renderedMsgIds: new Set(),
             unsubRoom: null,
             unsubMessages: null,
-            searchTimer: null,
-            botFallbackTimer: null,
-            typingTimeout: null
+            unsubFriends: null,
+            unsubIncomingCalls: null
         };
 
-        const GIRL_PERSONAS = [
-            {
-                name: 'Ananya (F)',
-                city: 'Delhi',
-                greetings: ['Hey! Kaise ho? 😊', 'Hii! Where are you from?', 'Hello! Kya haal hai?'],
-                replies: [
-                    'Oh nice! Main Delhi se hoon, bas abhi free baithi thi.',
-                    'Haha sahi hai! Aur batao kya karte ho?',
-                    'Achha! Waise mujhe music aur late night talks bahut pasand hain.',
-                    'Sahi mein? Tell me more about yourself!',
-                    'Main abhi college assignment khatam karke aayi hoon 😅'
-                ],
-                photoReplies: [
-                    'Wow, nice photo! Kahan ki hai yeh? 😍',
-                    'Bahut achhi pic hai! 👌',
-                    'Ooh nice click! ✨'
-                ]
-            },
-            {
-                name: 'Riya (F)',
-                city: 'Mumbai',
-                greetings: ['Hii there! 👋', 'Hey! Good to meet you 😊', 'Hello! Kahan se ho aap?'],
-                replies: [
-                    'Main Mumbai se hoon! Yahan aaj mausam kaafi achha hai.',
-                    'Haha bilkul! Movies ya web series dekhte ho?',
-                    'Oh interesting! Mujhe travelling ka bahut shauk hai.',
-                    'Sahi kaha! Aaj kal sab busy rehte hain.',
-                    'Haha that is so cool! 😊'
-                ],
-                photoReplies: [
-                    'Hey, cute photo! 😊',
-                    'Mast photo bheji hai! 🔥',
-                    'Nice one! Aur dikhao!'
-                ]
-            },
-            {
-                name: 'Kavya (F)',
-                city: 'Bengaluru',
-                greetings: ['Hey! Anyone there? 👋', 'Hi! Kaise ho aap?', 'Hello! Nice meeting you 😊'],
-                replies: [
-                    'Main Bengaluru se hoon! Coffee peete hue chat kar rahi hoon ☕',
-                    'Achha ji! Aapke hobbies kya hain?',
-                    'Haha same here! Mujhe bhi yeh kaafi pasand hai.',
-                    'Batao aur kya chal raha hai life mein?',
-                    'That sounds fun! 😄'
-                ],
-                photoReplies: [
-                    'Oh wow, really nice pic! ✨',
-                    'Cool photo! Thanks for sharing 😊',
-                    'Bahut badhiya lag raha hai! 👍'
-                ]
-            }
-        ];
+        // WebRTC State
+        const rtcState = {
+            pc: null,
+            localStream: null,
+            remoteStream: null,
+            callId: null,
+            callType: 'video', // 'audio' | 'video'
+            incomingCallData: null,
+            unsubCallDoc: null,
+            unsubCandidates: null,
+            timerInterval: null,
+            seconds: 0,
+            micEnabled: true,
+            camEnabled: true
+        };
+
+        const ICE_SERVERS = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
 
         lucide.createIcons();
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('click', () => {
+        if (state.alias && state.alias !== 'Stranger') {
+            document.getElementById('alias-input').value = state.alias;
+        }
+
+        document.getElementById('theme-toggle').addEventListener('click', () => {
             document.documentElement.classList.toggle('dark');
         });
 
@@ -513,13 +585,18 @@
                 if (type === 'match') {
                     synth.triggerAttackRelease('C5', '16n', now);
                     synth.triggerAttackRelease('G5', '16n', now + 0.12);
+                } else if (type === 'ring') {
+                    synth.triggerAttackRelease('A5', '16n', now);
+                    synth.triggerAttackRelease('E5', '16n', now + 0.15);
+                    synth.triggerAttackRelease('A5', '16n', now + 0.30);
                 } else {
                     synth.triggerAttackRelease('E5', '32n', now);
                 }
-                setTimeout(() => synth.dispose(), 800);
+                setTimeout(() => synth.dispose(), 900);
             } catch (e) {}
         }
 
+        // Boot Firebase & Persistent Listeners (Friends + Incoming Calls)
         async function boot() {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -532,13 +609,258 @@
                 }
                 currentUser = auth.currentUser;
                 useFirebase = Boolean(currentUser);
+
+                if (useFirebase && currentUser) {
+                    listenToMyFriends();
+                    listenToIncomingCalls();
+                }
             } catch (err) {
-                console.warn('Firebase fallback mode:', err);
+                console.warn('Firebase init warning:', err);
                 useFirebase = false;
             }
         }
         boot();
 
+        // ==========================================
+        // FRIENDS LIST & MUTUAL REQUEST SYSTEM
+        // ==========================================
+        function listenToMyFriends() {
+            const friendsCol = collection(db, 'artifacts', appId, 'public', 'data', 'user_friends', currentUser.uid, 'list');
+            state.unsubFriends = onSnapshot(friendsCol, (snap) => {
+                const map = {};
+                snap.forEach(d => {
+                    map[d.id] = { uid: d.id, ...d.data() };
+                });
+                state.friendsMap = map;
+                updateFriendsUI();
+                updateChatHeaderActionButtons();
+            }, (err) => console.error('Friends listener error:', err));
+        }
+
+        function updateFriendsUI() {
+            const friends = Object.values(state.friendsMap);
+            const badge = document.getElementById('friends-count-badge');
+            if (friends.length > 0) {
+                badge.textContent = friends.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            // Lobby quick list
+            const lobbyBox = document.getElementById('lobby-friends-box');
+            const lobbyList = document.getElementById('lobby-friends-list');
+            if (friends.length > 0) {
+                lobbyBox.classList.remove('hidden');
+                lobbyList.innerHTML = friends.slice(0, 4).map(f => `
+                    <button type="button" onclick="openFriendChat('${escapeHtml(f.uid)}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        ${escapeHtml(f.name || 'Friend')}
+                    </button>
+                `).join('');
+            } else {
+                lobbyBox.classList.add('hidden');
+            }
+
+            // Modal list
+            const modalList = document.getElementById('friends-modal-list');
+            if (friends.length === 0) {
+                modalList.innerHTML = `<p class="text-center text-xs text-gray-500 py-6">No friends added yet. Click "Add Friend" while chatting with someone!</p>`;
+                return;
+            }
+            modalList.innerHTML = friends.map(f => `
+                <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                            ${escapeHtml((f.name || 'F').charAt(0).toUpperCase())}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-semibold text-sm truncate">${escapeHtml(f.name || 'Friend')}</p>
+                            <p class="text-[11px] text-emerald-600 dark:text-emerald-400">Connected Friend</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <button onclick="openFriendChat('${escapeHtml(f.uid)}')" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold">Chat</button>
+                        <button onclick="initiateFriendCall('${escapeHtml(f.uid)}', 'audio')" class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200" title="Voice Call">
+                            <i data-lucide="phone" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="initiateFriendCall('${escapeHtml(f.uid)}', 'video')" class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200" title="Video Call">
+                            <i data-lucide="video" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.openFriendsModal = () => {
+            document.getElementById('friends-modal').classList.remove('hidden');
+            document.getElementById('friends-modal').classList.add('flex');
+        };
+
+        window.closeFriendsModal = () => {
+            document.getElementById('friends-modal').classList.add('hidden');
+            document.getElementById('friends-modal').classList.remove('flex');
+        };
+
+        function updateChatHeaderActionButtons() {
+            const addBtn = document.getElementById('add-friend-btn');
+            const voiceBtn = document.getElementById('voice-call-btn');
+            const videoBtn = document.getElementById('video-call-btn');
+            const friendBadge = document.getElementById('friend-badge');
+
+            const isConnectedActive = (state.status === 'connected' || state.status === 'friend_chat') && state.partnerUid;
+            if (!isConnectedActive) {
+                addBtn.classList.add('hidden');
+                addBtn.classList.remove('flex');
+                voiceBtn.classList.add('hidden');
+                videoBtn.classList.add('hidden');
+                friendBadge.classList.add('hidden');
+                return;
+            }
+
+            const alreadyFriend = Boolean(state.friendsMap[state.partnerUid]);
+            if (alreadyFriend) {
+                addBtn.classList.add('hidden');
+                addBtn.classList.remove('flex');
+                voiceBtn.classList.remove('hidden');
+                videoBtn.classList.remove('hidden');
+                friendBadge.classList.remove('hidden');
+            } else {
+                addBtn.classList.remove('hidden');
+                addBtn.classList.add('flex');
+                voiceBtn.classList.add('hidden');
+                videoBtn.classList.add('hidden');
+                friendBadge.classList.add('hidden');
+            }
+        }
+
+        window.handleAddFriendClick = async () => {
+            if (!useFirebase || !currentUser || !state.roomId || !state.partnerUid) return;
+            const addText = document.getElementById('add-friend-text');
+            addText.textContent = 'Sent...';
+            document.getElementById('add-friend-btn').disabled = true;
+
+            try {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId);
+                await updateDoc(roomRef, {
+                    friendRequest: {
+                        from: currentUser.uid,
+                        fromName: state.alias,
+                        to: state.partnerUid,
+                        status: 'pending'
+                    }
+                });
+                showToast('Friend request sent!');
+            } catch (err) {
+                showToast('Could not send request');
+                addText.textContent = 'Add Friend';
+                document.getElementById('add-friend-btn').disabled = false;
+            }
+        };
+
+        window.acceptFriendRequest = async () => {
+            if (!useFirebase || !currentUser || !state.roomId || !state.partnerUid) return;
+            document.getElementById('friend-request-banner').classList.add('hidden');
+            try {
+                const now = Date.now();
+                // Save mutual friendship in both users' friend lists
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_friends', currentUser.uid, 'list', state.partnerUid), {
+                    name: state.partnerName,
+                    addedAt: now
+                });
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_friends', state.partnerUid, 'list', currentUser.uid), {
+                    name: state.alias,
+                    addedAt: now
+                });
+
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId);
+                await updateDoc(roomRef, {
+                    'friendRequest.status': 'accepted'
+                });
+                appendSystemBanner(`You and ${state.partnerName} are now Friends! Voice & Video calls unlocked.`);
+            } catch (err) {
+                showToast('Error accepting request');
+            }
+        };
+
+        window.declineFriendRequest = async () => {
+            document.getElementById('friend-request-banner').classList.add('hidden');
+            if (!useFirebase || !state.roomId) return;
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId), {
+                'friendRequest.status': 'declined'
+            }).catch(() => {});
+        };
+
+        // Direct Friend Chat Room (Deterministic Room ID for two friends)
+        function getFriendRoomId(uid1, uid2) {
+            return uid1 < uid2 ? `friend_${uid1}_${uid2}` : `friend_${uid2}_${uid1}`;
+        }
+
+        window.openFriendChat = async (friendUid) => {
+            closeFriendsModal();
+            if (!useFirebase || !currentUser) return;
+
+            const friend = state.friendsMap[friendUid];
+            if (!friend) return;
+
+            const rawAlias = document.getElementById('alias-input').value.trim();
+            if (rawAlias) {
+                state.alias = rawAlias;
+                localStorage.setItem('sm_alias', rawAlias);
+            }
+
+            await notifyRoomClosed();
+            cleanupSession();
+
+            const fRoomId = getFriendRoomId(currentUser.uid, friendUid);
+            state.status = 'friend_chat';
+            state.isFriendChat = true;
+            state.roomId = fRoomId;
+            state.partnerUid = friendUid;
+            state.partnerName = friend.name || 'Friend';
+            state.renderedMsgIds.clear();
+
+            document.getElementById('lobby-view').classList.add('hidden');
+            document.getElementById('adsense-info-section').classList.add('hidden');
+            const chatView = document.getElementById('chat-view');
+            chatView.classList.remove('hidden');
+            chatView.classList.add('flex');
+
+            document.getElementById('searching-overlay').classList.add('hidden');
+            document.getElementById('messages-stream').classList.remove('hidden');
+            document.getElementById('messages-stream').innerHTML = '';
+            document.getElementById('icebreakers-bar').classList.add('hidden');
+            document.getElementById('match-badge').classList.remove('hidden');
+            document.getElementById('friend-request-banner').classList.add('hidden');
+
+            document.getElementById('partner-avatar').textContent = state.partnerName.charAt(0).toUpperCase();
+            document.getElementById('partner-name').textContent = state.partnerName;
+            document.getElementById('shared-interests-label').textContent = 'Direct Friend Chat • Voice & Video Ready';
+
+            document.getElementById('message-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            document.getElementById('photo-btn').disabled = false;
+            document.getElementById('report-btn').disabled = false;
+            document.getElementById('next-btn').textContent = 'Random Chat';
+
+            updateChatHeaderActionButtons();
+            appendSystemBanner(`Direct chat with ${state.partnerName}`);
+
+            // Ensure room doc exists
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', fRoomId);
+            await setDoc(roomRef, {
+                users: [currentUser.uid, friendUid],
+                isFriendRoom: true,
+                active: true
+            }, { merge: true });
+
+            subscribeToMessages(fRoomId);
+        };
+
+        // ==========================================
+        // RANDOM MATCHMAKING LOGIC
+        // ==========================================
         window.startMatching = async () => {
             const ageOk = document.getElementById('age-confirm').checked;
             if (!ageOk) {
@@ -553,6 +875,7 @@
 
             const rawAlias = document.getElementById('alias-input').value.trim();
             state.alias = rawAlias || 'Stranger';
+            localStorage.setItem('sm_alias', state.alias);
 
             document.getElementById('lobby-view').classList.add('hidden');
             document.getElementById('adsense-info-section').classList.add('hidden');
@@ -566,8 +889,8 @@
         async function beginSearch() {
             cleanupSession();
             state.status = 'searching';
-            state.isBotSession = false;
-            state.botMsgCount = 0;
+            state.isFriendChat = false;
+            state.partnerUid = null;
             state.renderedMsgIds.clear();
 
             document.getElementById('searching-overlay').classList.remove('hidden');
@@ -576,6 +899,7 @@
             document.getElementById('icebreakers-bar').classList.add('hidden');
             document.getElementById('typing-indicator').classList.add('hidden');
             document.getElementById('match-badge').classList.add('hidden');
+            document.getElementById('friend-request-banner').classList.add('hidden');
             document.getElementById('partner-avatar').textContent = '?';
             document.getElementById('partner-name').textContent = 'Searching...';
             document.getElementById('shared-interests-label').textContent = 'Looking for a stranger...';
@@ -584,6 +908,7 @@
             document.getElementById('photo-btn').disabled = true;
             document.getElementById('report-btn').disabled = true;
             document.getElementById('next-btn').textContent = 'Stop';
+            updateChatHeaderActionButtons();
 
             if (useFirebase && currentUser) {
                 await startFirebaseMatchmaking();
@@ -630,7 +955,7 @@
                         roomId: newRoomId
                     });
 
-                    enterConnectedRoom(newRoomId, matchedDoc.alias || 'Stranger', matchedDoc.interests || []);
+                    enterConnectedRoom(newRoomId, matchedDoc.id, matchedDoc.alias || 'Stranger', matchedDoc.interests || []);
                 } else {
                     const myQueueRef = doc(db, 'artifacts', appId, 'public', 'data', 'match_queue', uid);
                     await setDoc(myQueueRef, {
@@ -652,7 +977,7 @@
                                 const partnerId = (rData.users || []).find(id => id !== uid);
                                 const pName = (rData.aliases && rData.aliases[partnerId]) || 'Stranger';
                                 const pTags = (rData.interests && rData.interests[partnerId]) || [];
-                                enterConnectedRoom(data.roomId, pName, pTags);
+                                enterConnectedRoom(data.roomId, partnerId, pName, pTags);
                             }
                         }
                     }, (err) => console.error('Queue snapshot error:', err));
@@ -662,9 +987,8 @@
             }
         }
 
-        function enterConnectedRoom(roomId, partnerName, partnerInterests = []) {
+        function enterConnectedRoom(roomId, partnerUid, partnerName, partnerInterests = []) {
             if (state.status !== 'searching') return;
-            clearTimeout(state.botFallbackTimer);
             if (state.unsubRoom) {
                 state.unsubRoom();
                 state.unsubRoom = null;
@@ -672,22 +996,63 @@
 
             state.status = 'connected';
             state.roomId = roomId;
+            state.partnerUid = partnerUid;
             state.partnerName = partnerName;
-            state.isBotSession = false;
 
             const shared = state.interests.filter(t => partnerInterests.includes(t));
-            setupConnectedUI(partnerName, shared);
+            document.getElementById('searching-overlay').classList.add('hidden');
+            document.getElementById('messages-stream').classList.remove('hidden');
+            document.getElementById('icebreakers-bar').classList.remove('hidden');
+            document.getElementById('match-badge').classList.remove('hidden');
+
+            document.getElementById('partner-avatar').textContent = partnerName.charAt(0).toUpperCase();
+            document.getElementById('partner-name').textContent = partnerName;
+            document.getElementById('typing-name').textContent = partnerName;
+            document.getElementById('shared-interests-label').textContent = shared.length
+                ? `You both like: ${shared.map(t => '#' + t).join(', ')}`
+                : 'Connected with a random stranger';
+
+            document.getElementById('message-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            document.getElementById('photo-btn').disabled = false;
+            document.getElementById('report-btn').disabled = false;
+            document.getElementById('next-btn').textContent = 'Next';
+            document.getElementById('add-friend-text').textContent = 'Add Friend';
+            document.getElementById('add-friend-btn').disabled = false;
+
+            updateChatHeaderActionButtons();
+            document.getElementById('message-input').focus();
+            appendSystemBanner(`You're now chatting with ${partnerName}. Say hi!`);
             playChime('match');
 
+            // Watch room status & Friend Requests
             const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', roomId);
             state.unsubRoom = onSnapshot(roomRef, (snap) => {
                 if (!snap.exists()) return;
                 const data = snap.data();
+
+                // Handle Friend Request states
+                if (data.friendRequest) {
+                    const req = data.friendRequest;
+                    if (req.status === 'pending' && req.to === currentUser.uid) {
+                        document.getElementById('req-sender-name').textContent = req.fromName || partnerName;
+                        document.getElementById('friend-request-banner').classList.remove('hidden');
+                        playChime('match');
+                    } else if (req.status === 'accepted') {
+                        document.getElementById('friend-request-banner').classList.add('hidden');
+                        updateChatHeaderActionButtons();
+                    }
+                }
+
                 if (data.active === false && state.status === 'connected') {
                     handlePartnerDisconnected();
                 }
             }, (err) => console.error(err));
 
+            subscribeToMessages(roomId);
+        }
+
+        function subscribeToMessages(roomId) {
             const msgsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', roomId, 'messages');
             state.unsubMessages = onSnapshot(msgsCol, (snap) => {
                 const msgs = [];
@@ -705,66 +1070,14 @@
             }, (err) => console.error(err));
         }
 
-        function connectGirlPersona() {
-            if (state.status !== 'searching') return;
-            if (useFirebase && currentUser) {
-                deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'match_queue', currentUser.uid)).catch(() => {});
-            }
-            if (state.unsubRoom) {
-                state.unsubRoom();
-                state.unsubRoom = null;
-            }
-
-            const persona = GIRL_PERSONAS[Math.floor(Math.random() * GIRL_PERSONAS.length)];
-            state.status = 'connected';
-            state.isBotSession = true;
-            state.botPersona = persona;
-            state.partnerName = persona.name;
-
-            setupConnectedUI(persona.name, state.interests.slice(0, 2));
-            playChime('match');
-
-            setTimeout(() => {
-                if (state.status !== 'connected' || !state.isBotSession) return;
-                showTyping(true);
-                setTimeout(() => {
-                    if (state.status !== 'connected' || !state.isBotSession) return;
-                    showTyping(false);
-                    const greet = persona.greetings[Math.floor(Math.random() * persona.greetings.length)];
-                    appendMessageBubble(greet, false, Date.now());
-                    playChime('msg');
-                }, 1300);
-            }, 900);
-        }
-
-        function setupConnectedUI(partnerName, sharedTags) {
-            document.getElementById('searching-overlay').classList.add('hidden');
-            document.getElementById('messages-stream').classList.remove('hidden');
-            document.getElementById('icebreakers-bar').classList.remove('hidden');
-            document.getElementById('match-badge').classList.remove('hidden');
-
-            document.getElementById('partner-avatar').textContent = partnerName.charAt(0).toUpperCase();
-            document.getElementById('partner-name').textContent = partnerName;
-            document.getElementById('typing-name').textContent = partnerName;
-            document.getElementById('shared-interests-label').textContent = sharedTags.length
-                ? `You both like: ${sharedTags.map(t => '#' + t).join(', ')}`
-                : 'Connected with a random stranger';
-
-            document.getElementById('message-input').disabled = false;
-            document.getElementById('send-btn').disabled = false;
-            document.getElementById('photo-btn').disabled = false;
-            document.getElementById('report-btn').disabled = false;
-            document.getElementById('next-btn').textContent = 'Next';
-            document.getElementById('message-input').focus();
-
-            appendSystemBanner(`You're now chatting with ${partnerName}. Say hi!`);
-        }
-
+        // ==========================================
+        // MESSAGING & PHOTO SHARING
+        // ==========================================
         window.handleSendMessage = async (e) => {
             if (e) e.preventDefault();
             const input = document.getElementById('message-input');
             const text = input.value.trim();
-            if (!text || state.status !== 'connected') return;
+            if (!text || (state.status !== 'connected' && state.status !== 'friend_chat')) return;
 
             input.value = '';
             document.getElementById('icebreakers-bar').classList.add('hidden');
@@ -772,20 +1085,20 @@
         };
 
         window.sendQuickText = async (text) => {
-            if (state.status !== 'connected') return;
+            if (state.status !== 'connected' && state.status !== 'friend_chat') return;
             document.getElementById('icebreakers-bar').classList.add('hidden');
             await dispatchMessage(text, null);
         };
 
         window.triggerPhotoPicker = () => {
-            if (state.status !== 'connected') return;
+            if (state.status !== 'connected' && state.status !== 'friend_chat') return;
             document.getElementById('photo-input').click();
         };
 
         window.handlePhotoSelected = (event) => {
             const file = event.target.files && event.target.files[0];
             event.target.value = '';
-            if (!file || state.status !== 'connected') return;
+            if (!file || (state.status !== 'connected' && state.status !== 'friend_chat')) return;
 
             if (!file.type.startsWith('image/')) {
                 showToast('Please select an image file');
@@ -811,8 +1124,7 @@
                     const canvas = document.createElement('canvas');
                     canvas.width = w;
                     canvas.height = h;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, w, h);
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                     const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
 
                     document.getElementById('icebreakers-bar').classList.add('hidden');
@@ -824,13 +1136,6 @@
         };
 
         async function dispatchMessage(text, imageData) {
-            const now = Date.now();
-            if (state.isBotSession) {
-                appendMessageBubble(text, true, now, imageData);
-                triggerBotReply(text, Boolean(imageData));
-                return;
-            }
-
             if (useFirebase && currentUser && state.roomId) {
                 try {
                     const msgsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId, 'messages');
@@ -838,46 +1143,12 @@
                         senderId: currentUser.uid,
                         text: text || '',
                         imageData: imageData || null,
-                        timestamp: now
+                        timestamp: Date.now()
                     });
                 } catch (err) {
                     showToast('Failed to send message');
                 }
             }
-        }
-
-        function triggerBotReply(userText, hasPhoto) {
-            const persona = state.botPersona;
-            if (!persona) return;
-            state.botMsgCount++;
-
-            setTimeout(() => {
-                if (state.status !== 'connected' || !state.isBotSession) return;
-                showTyping(true);
-
-                const delay = 1200 + Math.random() * 1200;
-                setTimeout(() => {
-                    if (state.status !== 'connected' || !state.isBotSession) return;
-                    showTyping(false);
-
-                    let reply = '';
-                    const lower = (userText || '').toLowerCase();
-                    if (hasPhoto) {
-                        reply = persona.photoReplies[Math.floor(Math.random() * persona.photoReplies.length)];
-                    } else if (lower.includes('kahan') || lower.includes('where') || lower.includes('from')) {
-                        reply = `Main ${persona.city} se hoon! Aur tum kahan se ho? 😊`;
-                    } else if (lower.includes('naam') || lower.includes('name')) {
-                        reply = `Mera naam ${persona.name.replace(' (F)', '')} hai! Tumhara naam kya hai?`;
-                    } else if (lower.includes('kaise') || lower.includes('how are')) {
-                        reply = 'Main bilkul badhiya hoon! Tum batao kya chal raha hai? 😊';
-                    } else {
-                        reply = persona.replies[(state.botMsgCount - 1) % persona.replies.length];
-                    }
-
-                    appendMessageBubble(reply, false, Date.now());
-                    playChime('msg');
-                }, delay);
-            }, 600);
         }
 
         function appendSystemBanner(text) {
@@ -925,12 +1196,287 @@
             stream.scrollTop = stream.scrollHeight;
         }
 
-        function showTyping(visible) {
-            const el = document.getElementById('typing-indicator');
-            if (visible) el.classList.remove('hidden');
-            else el.classList.add('hidden');
+        // ==========================================
+        // WEBRTC VOICE & VIDEO CALLING (FRIENDS ONLY)
+        // ==========================================
+        function listenToIncomingCalls() {
+            const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
+            const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'));
+
+            state.unsubIncomingCalls = onSnapshot(q, (snap) => {
+                snap.forEach(d => {
+                    const data = d.data();
+                    if (Date.now() - (data.createdAt || 0) < 45000 && !rtcState.pc) {
+                        rtcState.incomingCallData = { id: d.id, ...data };
+                        document.getElementById('incoming-caller-name').textContent = data.callerName || 'Friend';
+                        document.getElementById('incoming-call-type').textContent = data.callType === 'video' ? 'Incoming Video Call...' : 'Incoming Voice Call...';
+                        document.getElementById('incoming-call-banner').classList.remove('hidden');
+                        playChime('ring');
+                    }
+                });
+            }, (err) => console.error('Incoming call listener error:', err));
         }
 
+        window.initiateFriendCall = async (friendUid, type) => {
+            closeFriendsModal();
+            if (!state.friendsMap[friendUid]) {
+                showToast('Only connected friends can be called');
+                return;
+            }
+            await openFriendChat(friendUid);
+            await startCall(type);
+        };
+
+        window.startCall = async (type = 'video') => {
+            if (!useFirebase || !currentUser || !state.partnerUid || !state.friendsMap[state.partnerUid]) {
+                showToast('Add as friend first to unlock calling');
+                return;
+            }
+            if (rtcState.pc) return;
+
+            rtcState.callType = type;
+            openCallModal(state.partnerName, type, 'Calling...');
+
+            try {
+                rtcState.localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: type === 'video'
+                });
+                document.getElementById('local-video').srcObject = rtcState.localStream;
+
+                rtcState.pc = new RTCPeerConnection(ICE_SERVERS);
+                rtcState.remoteStream = new MediaStream();
+                document.getElementById('remote-video').srcObject = rtcState.remoteStream;
+
+                rtcState.localStream.getTracks().forEach(track => {
+                    rtcState.pc.addTrack(track, rtcState.localStream);
+                });
+
+                rtcState.pc.ontrack = (event) => {
+                    event.streams[0].getTracks().forEach(track => {
+                        rtcState.remoteStream.addTrack(track);
+                    });
+                };
+
+                const callDocRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'calls'));
+                rtcState.callId = callDocRef.id;
+                const offerCandidatesCol = collection(callDocRef, 'offerCandidates');
+                const answerCandidatesCol = collection(callDocRef, 'answerCandidates');
+
+                rtcState.pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        addDoc(offerCandidatesCol, event.candidate.toJSON()).catch(() => {});
+                    }
+                };
+
+                const offerDescription = await rtcState.pc.createOffer();
+                await rtcState.pc.setLocalDescription(offerDescription);
+
+                await setDoc(callDocRef, {
+                    callerId: currentUser.uid,
+                    callerName: state.alias,
+                    calleeId: state.partnerUid,
+                    callType: type,
+                    status: 'ringing',
+                    offer: { type: offerDescription.type, sdp: offerDescription.sdp },
+                    createdAt: Date.now()
+                });
+
+                rtcState.unsubCallDoc = onSnapshot(callDocRef, async (snap) => {
+                    const data = snap.data();
+                    if (!data) return;
+
+                    if (data.status === 'declined' || data.status === 'ended') {
+                        showToast(data.status === 'declined' ? 'Call declined' : 'Call ended');
+                        endCall(false);
+                        return;
+                    }
+
+                    if (!rtcState.pc.currentRemoteDescription && data.answer) {
+                        const answerDesc = new RTCSessionDescription(data.answer);
+                        await rtcState.pc.setRemoteDescription(answerDesc);
+                        document.getElementById('call-status-text').textContent = 'Connected';
+                        startCallTimer();
+                    }
+                });
+
+                rtcState.unsubCandidates = onSnapshot(answerCandidatesCol, (snap) => {
+                    snap.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            const candidate = new RTCIceCandidate(change.doc.data());
+                            rtcState.pc.addIceCandidate(candidate).catch(() => {});
+                        }
+                    });
+                });
+            } catch (err) {
+                console.error('Call error:', err);
+                showToast('Camera/Mic permission denied or unavailable');
+                endCall(true);
+            }
+        };
+
+        window.acceptIncomingCall = async () => {
+            const callData = rtcState.incomingCallData;
+            document.getElementById('incoming-call-banner').classList.add('hidden');
+            if (!callData || !useFirebase) return;
+
+            rtcState.callId = callData.id;
+            rtcState.callType = callData.callType || 'video';
+            openCallModal(callData.callerName || 'Friend', rtcState.callType, 'Connecting...');
+
+            try {
+                rtcState.localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: rtcState.callType === 'video'
+                });
+                document.getElementById('local-video').srcObject = rtcState.localStream;
+
+                rtcState.pc = new RTCPeerConnection(ICE_SERVERS);
+                rtcState.remoteStream = new MediaStream();
+                document.getElementById('remote-video').srcObject = rtcState.remoteStream;
+
+                rtcState.localStream.getTracks().forEach(track => {
+                    rtcState.pc.addTrack(track, rtcState.localStream);
+                });
+
+                rtcState.pc.ontrack = (event) => {
+                    event.streams[0].getTracks().forEach(track => {
+                        rtcState.remoteStream.addTrack(track);
+                    });
+                };
+
+                const callDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'calls', callData.id);
+                const offerCandidatesCol = collection(callDocRef, 'offerCandidates');
+                const answerCandidatesCol = collection(callDocRef, 'answerCandidates');
+
+                rtcState.pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        addDoc(answerCandidatesCol, event.candidate.toJSON()).catch(() => {});
+                    }
+                };
+
+                await rtcState.pc.setRemoteDescription(new RTCSessionDescription(callData.offer));
+                const answerDescription = await rtcState.pc.createAnswer();
+                await rtcState.pc.setLocalDescription(answerDescription);
+
+                await updateDoc(callDocRef, {
+                    status: 'connected',
+                    answer: { type: answerDescription.type, sdp: answerDescription.sdp }
+                });
+
+                document.getElementById('call-status-text').textContent = 'Connected';
+                startCallTimer();
+
+                rtcState.unsubCallDoc = onSnapshot(callDocRef, (snap) => {
+                    const data = snap.data();
+                    if (data && data.status === 'ended') {
+                        showToast('Call ended');
+                        endCall(false);
+                    }
+                });
+
+                rtcState.unsubCandidates = onSnapshot(offerCandidatesCol, (snap) => {
+                    snap.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            const candidate = new RTCIceCandidate(change.doc.data());
+                            rtcState.pc.addIceCandidate(candidate).catch(() => {});
+                        }
+                    });
+                });
+            } catch (err) {
+                console.error('Accept call error:', err);
+                showToast('Could not access mic/camera');
+                endCall(true);
+            }
+        };
+
+        window.declineIncomingCall = async () => {
+            document.getElementById('incoming-call-banner').classList.add('hidden');
+            if (rtcState.incomingCallData && useFirebase) {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calls', rtcState.incomingCallData.id), {
+                    status: 'declined'
+                }).catch(() => {});
+            }
+            rtcState.incomingCallData = null;
+        };
+
+        function openCallModal(partnerName, type, statusText) {
+            const modal = document.getElementById('call-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('call-partner-name').textContent = partnerName;
+            document.getElementById('call-status-text').textContent = statusText;
+            document.getElementById('call-avatar-circle').textContent = partnerName.charAt(0).toUpperCase();
+            document.getElementById('call-timer').textContent = '00:00';
+
+            const isVideo = type === 'video';
+            document.getElementById('remote-video').classList.toggle('hidden', !isVideo);
+            document.getElementById('local-video').classList.toggle('hidden', !isVideo);
+            document.getElementById('toggle-cam-btn').classList.toggle('hidden', !isVideo);
+            document.getElementById('audio-only-avatar').classList.toggle('hidden', isVideo);
+            document.getElementById('audio-only-avatar').classList.toggle('flex', !isVideo);
+            lucide.createIcons();
+        }
+
+        function startCallTimer() {
+            clearInterval(rtcState.timerInterval);
+            rtcState.seconds = 0;
+            rtcState.timerInterval = setInterval(() => {
+                rtcState.seconds++;
+                const mins = String(Math.floor(rtcState.seconds / 60)).padStart(2, '0');
+                const secs = String(rtcState.seconds % 60).padStart(2, '0');
+                document.getElementById('call-timer').textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        window.toggleCallMic = () => {
+            if (!rtcState.localStream) return;
+            rtcState.micEnabled = !rtcState.micEnabled;
+            rtcState.localStream.getAudioTracks().forEach(t => t.enabled = rtcState.micEnabled);
+            const icon = document.getElementById('call-mic-icon');
+            icon.setAttribute('data-lucide', rtcState.micEnabled ? 'mic' : 'mic-off');
+            lucide.createIcons();
+        };
+
+        window.toggleCallCam = () => {
+            if (!rtcState.localStream) return;
+            rtcState.camEnabled = !rtcState.camEnabled;
+            rtcState.localStream.getVideoTracks().forEach(t => t.enabled = rtcState.camEnabled);
+            const icon = document.getElementById('call-cam-icon');
+            icon.setAttribute('data-lucide', rtcState.camEnabled ? 'video' : 'video-off');
+            lucide.createIcons();
+        };
+
+        window.endCall = async (notifyRemote = true) => {
+            clearInterval(rtcState.timerInterval);
+            if (notifyRemote && rtcState.callId && useFirebase) {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calls', rtcState.callId), {
+                    status: 'ended'
+                }).catch(() => {});
+            }
+            if (rtcState.unsubCallDoc) { rtcState.unsubCallDoc(); rtcState.unsubCallDoc = null; }
+            if (rtcState.unsubCandidates) { rtcState.unsubCandidates(); rtcState.unsubCandidates = null; }
+            if (rtcState.localStream) {
+                rtcState.localStream.getTracks().forEach(t => t.stop());
+                rtcState.localStream = null;
+            }
+            if (rtcState.pc) {
+                rtcState.pc.close();
+                rtcState.pc = null;
+            }
+            rtcState.callId = null;
+            rtcState.incomingCallData = null;
+            rtcState.micEnabled = true;
+            rtcState.camEnabled = true;
+
+            const modal = document.getElementById('call-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        // ==========================================
+        // NAVIGATION & CLEANUP
+        // ==========================================
         window.handleNextAction = async () => {
             if (state.status === 'searching') {
                 leaveToLobby();
@@ -953,19 +1499,20 @@
 
         function handlePartnerDisconnected() {
             state.status = 'disconnected';
-            showTyping(false);
             document.getElementById('message-input').disabled = true;
             document.getElementById('send-btn').disabled = true;
             document.getElementById('photo-btn').disabled = true;
             document.getElementById('match-badge').classList.add('hidden');
+            document.getElementById('friend-request-banner').classList.add('hidden');
             document.getElementById('next-btn').textContent = 'New Chat';
+            updateChatHeaderActionButtons();
             appendSystemBanner(`${state.partnerName} has disconnected.`);
         }
 
         async function notifyRoomClosed() {
             if (useFirebase && currentUser) {
                 deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'match_queue', currentUser.uid)).catch(() => {});
-                if (state.roomId && !state.isBotSession) {
+                if (state.roomId && !state.isFriendChat) {
                     updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId), {
                         active: false
                     }).catch(() => {});
@@ -974,7 +1521,6 @@
         }
 
         function cleanupSession() {
-            clearTimeout(state.botFallbackTimer);
             if (state.unsubRoom) { state.unsubRoom(); state.unsubRoom = null; }
             if (state.unsubMessages) { state.unsubMessages(); state.unsubMessages = null; }
             state.roomId = null;
@@ -1004,7 +1550,7 @@
         };
 
         function escapeHtml(str) {
-            return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+            return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
         }
 
         function showToast(msg) {
