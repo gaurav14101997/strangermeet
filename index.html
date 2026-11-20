@@ -15,33 +15,33 @@
     <meta name="keywords" content="strangermeet, talk to strangers, anonymous chat, free random chat india, 1 on 1 chat, stranger video call">
     <meta name="author" content="StrangerMeet">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="[https://strangermeet.in/](https://strangermeet.in/)">
+    <link rel="canonical" href="https://strangermeet.in/">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="StrangerMeet">
     <meta property="og:title" content="StrangerMeet — Talk to Strangers & Make Friends">
     <meta property="og:description" content="Instant 1-on-1 random chat with interest matching, photo sharing, friend lists, and free voice/video calls.">
-    <meta property="og:url" content="[https://strangermeet.in/](https://strangermeet.in/)">
-    <meta property="og:image" content="[https://strangermeet.in/favicon.svg](https://strangermeet.in/favicon.svg)">
+    <meta property="og:url" content="https://strangermeet.in/">
+    <meta property="og:image" content="https://strangermeet.in/favicon.svg">
 
     <!-- Structured Data (Schema.org) for Google Search -->
     <script type="application/ld+json">
     {
-      "@context": "[https://schema.org](https://schema.org)",
+      "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "StrangerMeet",
       "alternateName": "strangermeet.in",
-      "url": "[https://strangermeet.in/](https://strangermeet.in/)",
+      "url": "https://strangermeet.in/",
       "description": "Free anonymous 1-on-1 random chat platform with interest matching, friend connections, and peer-to-peer voice and video calls."
     }
     </script>
 
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
-    <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap)" rel="stylesheet">
-    <script src="[https://unpkg.com/lucide@latest](https://unpkg.com/lucide@latest)"></script>
-    <script src="[https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js](https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js)"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
     <script>
         tailwind.config = {
@@ -549,7 +549,7 @@
             },
             privacy: {
                 title: 'Privacy Policy',
-                body: '<p><strong>1. Information We Collect:</strong> StrangerMeet does not require registration, email addresses, or phone numbers. We use Firebase Anonymous Authentication to assign a temporary browser identifier so your saved friends list remains available on your device.</p><p><strong>2. Messages & WebRTC Calls:</strong> Text and image messages are transmitted via Google Cloud Firestore. Voice and video calls between mutually accepted friends use direct peer-to-peer WebRTC encryption and are never recorded or stored on our servers.</p><p><strong>3. Advertising & Cookies:</strong> We partner with third-party advertising networks such as <strong>Google AdSense</strong>, which may use cookies or web beacons to serve relevant advertisements based on your visits. You may opt out of personalized advertising by visiting <a href="[https://adssettings.google.com](https://adssettings.google.com)" target="_blank" rel="noopener" class="text-blue-600 underline">Google Ads Settings</a>.</p>'
+                body: '<p><strong>1. Information We Collect:</strong> StrangerMeet does not require registration, email addresses, or phone numbers. We use Firebase Anonymous Authentication to assign a temporary browser identifier so your saved friends list remains available on your device.</p><p><strong>2. Messages & WebRTC Calls:</strong> Text and image messages are transmitted via Google Cloud Firestore. Voice and video calls between mutually accepted friends use direct peer-to-peer WebRTC encryption and are never recorded or stored on our servers.</p><p><strong>3. Advertising & Cookies:</strong> We partner with third-party advertising networks such as <strong>Google AdSense</strong>, which may use cookies or web beacons to serve relevant advertisements based on your visits. You may opt out of personalized advertising by visiting <a href="https://adssettings.google.com" target="_blank" rel="noopener" class="text-blue-600 underline">Google Ads Settings</a>.</p>'
             },
             terms: {
                 title: 'Terms & Conditions',
@@ -581,9 +581,9 @@
 
     <!-- FIREBASE + SPARK-FREE AUTO-JANITOR (24H + 50-MSG) + PRESENCE + FRIENDS + WEBRTC LOGIC -->
     <script type="module">
-        import { initializeApp } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js)";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js)";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, addDoc, getDocs, query, where, limit } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js)";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, addDoc, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const defaultFirebaseConfig = {
             apiKey: "AIzaSyBN2zAmTvQDdmzO1QAxmM72nI-KoUWlN4U",
@@ -759,7 +759,7 @@
             return Boolean(presenceData.online && (Date.now() - presenceData.lastSeen < 65000));
         }
 
-        // Spark-Free Background Garbage Collector (deletes >24h inactive rooms, messages, stale queue & old calls)
+        // Spark-Free Background Garbage Collector
         async function runBackgroundGarbageCollector() {
             if (!useFirebase || !currentUser) return;
             const now = Date.now();
