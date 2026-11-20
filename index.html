@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StrangerMeet — Free Anonymous 1-on-1 Chat, Friends & Voice/Video Calls</title>
 
-    <!-- Hosted Favicon for Browser Tabs & Google Search Results -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="96x96">
     <link rel="shortcut icon" href="/favicon.svg">
     <link rel="apple-touch-icon" href="/favicon.svg">
 
-    <!-- Primary SEO & OpenGraph Meta Tags -->
     <meta name="description" content="StrangerMeet (strangermeet.in) is a free, safe, and anonymous 1-on-1 random chat platform. Match by interests, share photos, add friends, and enjoy free WebRTC voice and video calls.">
     <meta name="keywords" content="strangermeet, talk to strangers, anonymous chat, free random chat india, 1 on 1 chat, stranger video call">
     <meta name="author" content="StrangerMeet">
@@ -24,7 +22,6 @@
     <meta property="og:url" content="https://strangermeet.in/">
     <meta property="og:image" content="https://strangermeet.in/favicon.svg">
 
-    <!-- Structured Data (Schema.org) for Google Search -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -150,9 +147,7 @@
     <!-- MAIN APP CONTAINER -->
     <main class="flex flex-col items-center justify-center px-2.5 sm:px-6 pt-4 sm:pt-5 pb-4">
 
-        <!-- ========================================== -->
-        <!-- VIEW 1: START SCREEN (LOBBY)               -->
-        <!-- ========================================== -->
+        <!-- VIEW 1: START SCREEN (LOBBY) -->
         <section id="lobby-view" class="w-full max-w-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm p-6 sm:p-8">
             <div class="text-center mb-6">
                 <span class="inline-block px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 mb-2">
@@ -213,14 +208,11 @@
             </div>
         </section>
 
-        <!-- ========================================== -->
-        <!-- VIEW 2: ACTIVE CHAT BOX (MOBILE-OPTIMIZED) -->
-        <!-- ========================================== -->
+        <!-- VIEW 2: ACTIVE CHAT BOX (MOBILE-FIXED HEADER) -->
         <section id="chat-view" class="hidden w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex-col overflow-hidden">
             
-            <!-- Mobile-Responsive Chat Top Header -->
             <div class="px-2.5 sm:px-4 py-2.5 sm:py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-1.5 flex-shrink-0">
-                <!-- Left: Avatar + Full Partner Name + Status Dot -->
+                <!-- Left: Avatar + Full Partner Name -->
                 <div class="flex items-center gap-2 min-w-0 flex-1">
                     <div class="relative flex-shrink-0">
                         <div id="partner-avatar" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-xs sm:text-sm">
@@ -229,12 +221,12 @@
                         <span id="online-dot" class="hidden absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-900"></span>
                     </div>
                     <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-1.5">
+                        <div class="flex items-center gap-1.5 min-w-0">
                             <h2 id="partner-name" class="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate">Searching...</h2>
-                            <span id="match-badge" class="hidden sm:inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 flex-shrink-0">Online</span>
-                            <span id="friend-badge" class="hidden sm:inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400 flex-shrink-0">Friend</span>
+                            <span id="match-badge" class="hidden max-sm:hidden text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 flex-shrink-0">Online</span>
+                            <span id="friend-badge" class="hidden max-sm:hidden text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400 flex-shrink-0">Friend</span>
                         </div>
-                        <p id="shared-interests-label" class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">Looking for a stranger...</p>
+                        <p id="shared-interests-label" class="hidden sm:block text-xs text-gray-500 dark:text-gray-400 truncate">Looking for a stranger...</p>
                     </div>
                 </div>
 
@@ -335,9 +327,7 @@
         </section>
     </main>
 
-    <!-- ========================================================================= -->
-    <!-- RICH EDITORIAL CONTENT SECTION (FOR GOOGLE ADSENSE & ORGANIC SEO)         -->
-    <!-- ========================================================================= -->
+    <!-- RICH EDITORIAL CONTENT SECTION (FOR GOOGLE ADSENSE & ORGANIC SEO) -->
     <div id="adsense-info-section" class="max-w-4xl mx-auto px-4 py-8 text-slate-700 dark:text-slate-300 space-y-8">
         
         <section id="how-it-works" class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8 shadow-sm space-y-5">
