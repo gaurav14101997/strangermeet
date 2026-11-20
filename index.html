@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StrangerMeet — Free Anonymous 1-on-1 Chat, Friends & Voice/Video Calls</title>
 
+    <!-- Hosted Favicon for Browser Tabs & Google Search Results -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="96x96">
     <link rel="shortcut icon" href="/favicon.svg">
     <link rel="apple-touch-icon" href="/favicon.svg">
 
+    <!-- Primary SEO & OpenGraph Meta Tags -->
     <meta name="description" content="StrangerMeet (strangermeet.in) is a free, safe, and anonymous 1-on-1 random chat platform. Match by interests, share photos, add friends, and enjoy free WebRTC voice and video calls.">
     <meta name="keywords" content="strangermeet, talk to strangers, anonymous chat, free random chat india, 1 on 1 chat, stranger video call">
     <meta name="author" content="StrangerMeet">
@@ -22,6 +24,7 @@
     <meta property="og:url" content="https://strangermeet.in/">
     <meta property="og:image" content="https://strangermeet.in/favicon.svg">
 
+    <!-- Structured Data (Schema.org) for Google Search -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -208,11 +211,11 @@
             </div>
         </section>
 
-        <!-- VIEW 2: ACTIVE CHAT BOX (MOBILE-FIXED HEADER) -->
+        <!-- VIEW 2: ACTIVE CHAT BOX (MOBILE-FIXED HEADER + LAST SEEN + TIMESTAMPS) -->
         <section id="chat-view" class="hidden w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex-col overflow-hidden">
             
-            <div class="px-2.5 sm:px-4 py-2.5 sm:py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-1.5 flex-shrink-0">
-                <!-- Left: Avatar + Full Partner Name -->
+            <div class="px-2.5 sm:px-4 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-1.5 flex-shrink-0">
+                <!-- Left: Avatar + Partner Name + Online/Last Seen -->
                 <div class="flex items-center gap-2 min-w-0 flex-1">
                     <div class="relative flex-shrink-0">
                         <div id="partner-avatar" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-xs sm:text-sm">
@@ -222,11 +225,11 @@
                     </div>
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-1.5 min-w-0">
-                            <h2 id="partner-name" class="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate">Searching...</h2>
+                            <h2 id="partner-name" class="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate leading-tight">Searching...</h2>
                             <span id="match-badge" class="hidden max-sm:hidden text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 flex-shrink-0">Online</span>
                             <span id="friend-badge" class="hidden max-sm:hidden text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400 flex-shrink-0">Friend</span>
                         </div>
-                        <p id="shared-interests-label" class="hidden sm:block text-xs text-gray-500 dark:text-gray-400 truncate">Looking for a stranger...</p>
+                        <p id="shared-interests-label" class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate leading-tight mt-0.5">Looking for a stranger...</p>
                     </div>
                 </div>
 
@@ -576,7 +579,7 @@
         }
     </script>
 
-    <!-- FIREBASE + FRIENDS + UNFRIEND + WEBRTC APP LOGIC -->
+    <!-- FIREBASE + PRESENCE (LAST SEEN) + TIMESTAMPS + FRIENDS + WEBRTC LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -615,11 +618,14 @@
             partnerName: 'Stranger',
             isFriendChat: false,
             friendsMap: {},
+            presenceMap: {},
             renderedMsgIds: new Set(),
             unsubRoom: null,
             unsubMessages: null,
             unsubFriends: null,
-            unsubIncomingCalls: null
+            unsubIncomingCalls: null,
+            unsubPartnerPresence: null,
+            presenceHeartbeat: null
         };
 
         const rtcState = {
@@ -719,6 +725,121 @@
             } catch (e) {}
         }
 
+        // ==========================================
+        // TIME FORMATTING HELPERS (CHAT TIME + LAST SEEN)
+        // ==========================================
+        function formatChatTime(ts) {
+            if (!ts) return '';
+            const d = new Date(ts);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+        }
+
+        function formatLastSeen(presenceData) {
+            if (!presenceData || !presenceData.lastSeen) return 'Offline';
+            const now = Date.now();
+            const diff = now - presenceData.lastSeen;
+            // Consider user online if active within last 65 seconds and not marked offline
+            if (presenceData.online && diff < 65000) {
+                return 'Online';
+            }
+            const d = new Date(presenceData.lastSeen);
+            const today = new Date();
+            const isToday = d.toDateString() === today.toDateString();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const isYesterday = d.toDateString() === yesterday.toDateString();
+
+            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+            if (isToday) return `Last seen today at ${timeStr}`;
+            if (isYesterday) return `Last seen yesterday at ${timeStr}`;
+            return `Last seen ${d.toLocaleDateString([], { day: 'numeric', month: 'short' })}, ${timeStr}`;
+        }
+
+        function isFriendOnline(presenceData) {
+            if (!presenceData || !presenceData.lastSeen) return false;
+            return Boolean(presenceData.online && (Date.now() - presenceData.lastSeen < 65000));
+        }
+
+        // ==========================================
+        // USER PRESENCE (ONLINE / LAST SEEN TRACKER)
+        // ==========================================
+        async function updateMyPresence(isOnline = true) {
+            if (!useFirebase || !currentUser) return;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_presence', currentUser.uid), {
+                    online: isOnline,
+                    lastSeen: Date.now(),
+                    alias: state.alias
+                }, { merge: true });
+            } catch (e) {}
+        }
+
+        function startPresenceTracking() {
+            updateMyPresence(true);
+            clearInterval(state.presenceHeartbeat);
+            state.presenceHeartbeat = setInterval(() => {
+                if (!document.hidden) {
+                    updateMyPresence(true);
+                }
+            }, 30000);
+
+            document.addEventListener('visibilitychange', () => {
+                updateMyPresence(!document.hidden);
+            });
+            window.addEventListener('beforeunload', () => {
+                updateMyPresence(false);
+            });
+        }
+
+        async function fetchFriendsPresence(friendUids) {
+            if (!useFirebase || !friendUids.length) return;
+            for (const fUid of friendUids) {
+                try {
+                    const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_presence', fUid));
+                    if (snap.exists()) {
+                        state.presenceMap[fUid] = snap.data();
+                    }
+                } catch (e) {}
+            }
+            updateFriendsUI();
+        }
+
+        function subscribePartnerPresence(partnerUid) {
+            if (state.unsubPartnerPresence) {
+                state.unsubPartnerPresence();
+                state.unsubPartnerPresence = null;
+            }
+            if (!useFirebase || !partnerUid) return;
+
+            const presRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_presence', partnerUid);
+            state.unsubPartnerPresence = onSnapshot(presRef, (snap) => {
+                if (!snap.exists()) return;
+                const pData = snap.data();
+                state.presenceMap[partnerUid] = pData;
+
+                if (state.isFriendChat || state.friendsMap[partnerUid]) {
+                    const online = isFriendOnline(pData);
+                    const statusLabel = document.getElementById('shared-interests-label');
+                    const onlineDot = document.getElementById('online-dot');
+                    const matchBadge = document.getElementById('match-badge');
+
+                    if (online) {
+                        statusLabel.textContent = 'Online';
+                        statusLabel.classList.remove('text-gray-500', 'dark:text-gray-400');
+                        statusLabel.classList.add('text-emerald-600', 'dark:text-emerald-400', 'font-medium');
+                        onlineDot.classList.remove('hidden');
+                        matchBadge.textContent = 'Online';
+                    } else {
+                        statusLabel.textContent = formatLastSeen(pData);
+                        statusLabel.classList.remove('text-emerald-600', 'dark:text-emerald-400', 'font-medium');
+                        statusLabel.classList.add('text-gray-500', 'dark:text-gray-400');
+                        onlineDot.classList.add('hidden');
+                        matchBadge.textContent = 'Offline';
+                    }
+                }
+            });
+        }
+
         async function boot() {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -733,6 +854,7 @@
                 useFirebase = Boolean(currentUser);
 
                 if (useFirebase && currentUser) {
+                    startPresenceTracking();
                     listenToMyFriends();
                     listenToIncomingCalls();
                 }
@@ -754,6 +876,7 @@
                     map[d.id] = { uid: d.id, ...d.data() };
                 });
                 state.friendsMap = map;
+                fetchFriendsPresence(Object.keys(map));
                 updateFriendsUI();
                 updateChatHeaderActionButtons();
             }, (err) => console.error('Friends listener error:', err));
@@ -773,12 +896,15 @@
             const lobbyList = document.getElementById('lobby-friends-list');
             if (friends.length > 0) {
                 lobbyBox.classList.remove('hidden');
-                lobbyList.innerHTML = friends.slice(0, 4).map(f => `
-                    <button type="button" onclick="openFriendChat('${escapeHtml(f.uid)}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 text-blue-700 dark:text-blue-300 text-xs font-medium">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        ${escapeHtml(f.name || 'Friend')}
-                    </button>
-                `).join('');
+                lobbyList.innerHTML = friends.slice(0, 4).map(f => {
+                    const online = isFriendOnline(state.presenceMap[f.uid]);
+                    return `
+                        <button type="button" onclick="openFriendChat('${escapeHtml(f.uid)}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                            <span class="w-2 h-2 rounded-full ${online ? 'bg-emerald-500' : 'bg-gray-400'}"></span>
+                            ${escapeHtml(f.name || 'Friend')}
+                        </button>
+                    `;
+                }).join('');
             } else {
                 lobbyBox.classList.add('hidden');
             }
@@ -788,35 +914,44 @@
                 modalList.innerHTML = `<p class="text-center text-xs text-gray-500 py-6">No friends added yet. Click "Add Friend" while chatting with someone!</p>`;
                 return;
             }
-            modalList.innerHTML = friends.map(f => `
-                <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 gap-2">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                            ${escapeHtml((f.name || 'F').charAt(0).toUpperCase())}
+            modalList.innerHTML = friends.map(f => {
+                const pData = state.presenceMap[f.uid];
+                const online = isFriendOnline(pData);
+                const statusText = online ? 'Online' : formatLastSeen(pData);
+                return `
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="relative flex-shrink-0">
+                                <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                                    ${escapeHtml((f.name || 'F').charAt(0).toUpperCase())}
+                                </div>
+                                <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${online ? 'bg-emerald-500' : 'bg-gray-400'} ring-2 ring-white dark:ring-gray-800"></span>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-sm truncate">${escapeHtml(f.name || 'Friend')}</p>
+                                <p class="text-[11px] truncate ${online ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-gray-500 dark:text-gray-400'}">${escapeHtml(statusText)}</p>
+                            </div>
                         </div>
-                        <div class="min-w-0">
-                            <p class="font-semibold text-sm truncate">${escapeHtml(f.name || 'Friend')}</p>
-                            <p class="text-[11px] text-emerald-600 dark:text-emerald-400">Connected Friend</p>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            <button onclick="openFriendChat('${escapeHtml(f.uid)}')" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold">Chat</button>
+                            <button onclick="initiateFriendCall('${escapeHtml(f.uid)}', 'audio')" class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200" title="Voice Call">
+                                <i data-lucide="phone" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="initiateFriendCall('${escapeHtml(f.uid)}', 'video')" class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200" title="Video Call">
+                                <i data-lucide="video" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="unfriendUser('${escapeHtml(f.uid)}')" class="p-2 rounded-lg bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 hover:bg-red-200" title="Unfriend">
+                                <i data-lucide="user-minus" class="w-4 h-4"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1 flex-shrink-0">
-                        <button onclick="openFriendChat('${escapeHtml(f.uid)}')" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold">Chat</button>
-                        <button onclick="initiateFriendCall('${escapeHtml(f.uid)}', 'audio')" class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200" title="Voice Call">
-                            <i data-lucide="phone" class="w-4 h-4"></i>
-                        </button>
-                        <button onclick="initiateFriendCall('${escapeHtml(f.uid)}', 'video')" class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200" title="Video Call">
-                            <i data-lucide="video" class="w-4 h-4"></i>
-                        </button>
-                        <button onclick="unfriendUser('${escapeHtml(f.uid)}')" class="p-2 rounded-lg bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 hover:bg-red-200" title="Unfriend">
-                            <i data-lucide="user-minus" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             lucide.createIcons();
         }
 
         window.openFriendsModal = () => {
+            fetchFriendsPresence(Object.keys(state.friendsMap));
             document.getElementById('friends-modal').classList.remove('hidden');
             document.getElementById('friends-modal').classList.add('flex');
         };
@@ -883,6 +1018,7 @@
                 videoBtn.classList.remove('hidden');
                 unfriendBtn.classList.remove('hidden');
                 friendBadge.classList.remove('hidden');
+                subscribePartnerPresence(state.partnerUid);
             } else {
                 addBtn.classList.remove('hidden');
                 addBtn.classList.add('flex');
@@ -989,12 +1125,11 @@
             document.getElementById('messages-stream').innerHTML = '';
             document.getElementById('icebreakers-bar').classList.add('hidden');
             document.getElementById('match-badge').classList.remove('hidden');
-            document.getElementById('online-dot').classList.remove('hidden');
             document.getElementById('friend-request-banner').classList.add('hidden');
 
             document.getElementById('partner-avatar').textContent = state.partnerName.charAt(0).toUpperCase();
             document.getElementById('partner-name').textContent = state.partnerName;
-            document.getElementById('shared-interests-label').textContent = 'Direct Friend Chat';
+            document.getElementById('shared-interests-label').textContent = formatLastSeen(state.presenceMap[friendUid]);
 
             document.getElementById('message-input').disabled = false;
             document.getElementById('send-btn').disabled = false;
@@ -1033,6 +1168,7 @@
             const rawAlias = document.getElementById('alias-input').value.trim();
             state.alias = rawAlias || 'Stranger';
             localStorage.setItem('sm_alias', state.alias);
+            updateMyPresence(true);
 
             document.getElementById('lobby-view').classList.add('hidden');
             document.getElementById('adsense-info-section').classList.add('hidden');
@@ -1060,7 +1196,11 @@
             document.getElementById('friend-request-banner').classList.add('hidden');
             document.getElementById('partner-avatar').textContent = '?';
             document.getElementById('partner-name').textContent = 'Searching...';
-            document.getElementById('shared-interests-label').textContent = 'Looking for a stranger...';
+            const statusLabel = document.getElementById('shared-interests-label');
+            statusLabel.textContent = 'Looking for a stranger...';
+            statusLabel.classList.remove('text-emerald-600', 'dark:text-emerald-400', 'font-medium');
+            statusLabel.classList.add('text-gray-500', 'dark:text-gray-400');
+
             document.getElementById('message-input').disabled = true;
             document.getElementById('send-btn').disabled = true;
             document.getElementById('photo-btn').disabled = true;
@@ -1168,9 +1308,12 @@
             document.getElementById('partner-avatar').textContent = partnerName.charAt(0).toUpperCase();
             document.getElementById('partner-name').textContent = partnerName;
             document.getElementById('typing-name').textContent = partnerName;
-            document.getElementById('shared-interests-label').textContent = shared.length
+            const statusLabel = document.getElementById('shared-interests-label');
+            statusLabel.textContent = shared.length
                 ? `Likes: ${shared.map(t => '#' + t).join(', ')}`
-                : 'Connected';
+                : 'Online';
+            statusLabel.classList.remove('text-gray-500', 'dark:text-gray-400');
+            statusLabel.classList.add('text-emerald-600', 'dark:text-emerald-400', 'font-medium');
 
             document.getElementById('message-input').disabled = false;
             document.getElementById('send-btn').disabled = false;
@@ -1229,7 +1372,7 @@
         }
 
         // ==========================================
-        // MESSAGING & PHOTO SHARING
+        // MESSAGING & PHOTO SHARING (WITH TIMESTAMPS)
         // ==========================================
         window.handleSendMessage = async (e) => {
             if (e) e.preventDefault();
@@ -1329,8 +1472,8 @@
 
             const bubble = document.createElement('div');
             bubble.className = isMe
-                ? 'max-w-[80%] sm:max-w-[70%] rounded-2xl rounded-br-sm px-3.5 py-2.5 bg-blue-600 text-white text-sm shadow-sm'
-                : 'max-w-[80%] sm:max-w-[70%] rounded-2xl rounded-bl-sm px-3.5 py-2.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 text-sm shadow-sm';
+                ? 'max-w-[82%] sm:max-w-[70%] rounded-2xl rounded-br-sm px-3.5 py-2 bg-blue-600 text-white text-sm shadow-sm'
+                : 'max-w-[82%] sm:max-w-[70%] rounded-2xl rounded-bl-sm px-3.5 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 text-sm shadow-sm';
 
             if (imageData) {
                 const img = document.createElement('img');
@@ -1346,6 +1489,16 @@
                 p.className = imageData ? 'mt-1.5 break-words' : 'break-words';
                 p.textContent = text;
                 bubble.appendChild(p);
+            }
+
+            // Message Timing Stamp (e.g., 12:30 PM)
+            if (timestamp) {
+                const timeSpan = document.createElement('span');
+                timeSpan.className = isMe
+                    ? 'block text-[10px] text-blue-100/90 text-right mt-1 select-none'
+                    : 'block text-[10px] text-gray-400 dark:text-gray-500 text-right mt-1 select-none';
+                timeSpan.textContent = formatChatTime(timestamp);
+                bubble.appendChild(timeSpan);
             }
 
             wrapper.appendChild(senderLabel);
@@ -1664,6 +1817,10 @@
             document.getElementById('online-dot').classList.add('hidden');
             document.getElementById('friend-request-banner').classList.add('hidden');
             document.getElementById('next-btn').textContent = 'New Chat';
+            const statusLabel = document.getElementById('shared-interests-label');
+            statusLabel.textContent = 'Disconnected';
+            statusLabel.classList.remove('text-emerald-600', 'dark:text-emerald-400', 'font-medium');
+            statusLabel.classList.add('text-gray-500', 'dark:text-gray-400');
             updateChatHeaderActionButtons();
             appendSystemBanner(`${state.partnerName} has disconnected.`);
         }
@@ -1682,6 +1839,7 @@
         function cleanupSession() {
             if (state.unsubRoom) { state.unsubRoom(); state.unsubRoom = null; }
             if (state.unsubMessages) { state.unsubMessages(); state.unsubMessages = null; }
+            if (state.unsubPartnerPresence) { state.unsubPartnerPresence(); state.unsubPartnerPresence = null; }
             state.roomId = null;
         }
 
