@@ -211,7 +211,7 @@
             </div>
         </section>
 
-        <!-- VIEW 2: ACTIVE CHAT BOX (SPARK-FREE AUTO-CLEANUP + LAST SEEN + TIMESTAMPS) -->
+        <!-- VIEW 2: ACTIVE CHAT BOX (TYPING + CALLS WITH FRIEND GATE + AUTO-CLEANUP) -->
         <section id="chat-view" class="hidden w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex-col overflow-hidden">
             
             <div class="px-2.5 sm:px-4 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-1.5 flex-shrink-0">
@@ -233,18 +233,18 @@
                     </div>
                 </div>
 
-                <!-- Right: Compact Action Buttons -->
+                <!-- Right: Compact Action Buttons (Voice & Video Always Visible During Chat) -->
                 <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
                     <button onclick="handleAddFriendClick()" id="add-friend-btn" class="hidden items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 text-blue-600 dark:text-blue-400 text-xs font-semibold transition-colors" title="Add Friend">
                         <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                         <span id="add-friend-text" class="hidden sm:inline">Add Friend</span>
                     </button>
 
-                    <button onclick="startCall('audio')" id="voice-call-btn" class="hidden p-1.5 sm:p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 transition-colors" title="Voice Call">
+                    <button onclick="handleCallButtonClick('audio')" id="voice-call-btn" class="hidden p-1.5 sm:p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 transition-colors" title="Voice Call (Add Friend to unlock)">
                         <i data-lucide="phone" class="w-4 h-4"></i>
                     </button>
 
-                    <button onclick="startCall('video')" id="video-call-btn" class="hidden p-1.5 sm:p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 transition-colors" title="Video Call">
+                    <button onclick="handleCallButtonClick('video')" id="video-call-btn" class="hidden p-1.5 sm:p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 transition-colors" title="Video Call (Add Friend to unlock)">
                         <i data-lucide="video" class="w-4 h-4"></i>
                     </button>
 
@@ -579,7 +579,7 @@
         }
     </script>
 
-    <!-- FIREBASE + SPARK-FREE AUTO-JANITOR (24H + 50-MSG) + PRESENCE + FRIENDS + WEBRTC LOGIC -->
+    <!-- FIREBASE + TYPING + CALL FRIEND GATE + AUTO-CLEANUP + WEBRTC LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -653,6 +653,9 @@
             ]
         };
 
+        let lastTypingSent = 0;
+        let typingHideTimer = null;
+
         lucide.createIcons();
         if (state.alias && state.alias !== 'Stranger') {
             document.getElementById('alias-input').value = state.alias;
@@ -670,6 +673,61 @@
                 interestInput.value = '';
             }
         });
+
+        // Live Typing Emitter on Message Input
+        const messageInputEl = document.getElementById('message-input');
+        messageInputEl.addEventListener('input', () => {
+            if (!useFirebase || !currentUser || !state.roomId) return;
+            if (state.status !== 'connected' && state.status !== 'friend_chat') return;
+
+            const now = Date.now();
+            if (!messageInputEl.value.trim()) {
+                lastTypingSent = 0;
+                updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId), {
+                    [`typing.${currentUser.uid}`]: 0
+                }).catch(() => {});
+                return;
+            }
+
+            if (now - lastTypingSent > 1500) {
+                lastTypingSent = now;
+                updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId), {
+                    [`typing.${currentUser.uid}`]: now
+                }).catch(() => {});
+            }
+        });
+
+        function clearMyTypingFlag() {
+            lastTypingSent = 0;
+            if (useFirebase && currentUser && state.roomId) {
+                updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId), {
+                    [`typing.${currentUser.uid}`]: 0
+                }).catch(() => {});
+            }
+        }
+
+        function handlePartnerTypingSnapshot(data) {
+            clearTimeout(typingHideTimer);
+            const indicator = document.getElementById('typing-indicator');
+            document.getElementById('typing-name').textContent = state.partnerName || 'Stranger';
+
+            if (!data || !data.typing || !state.partnerUid) {
+                indicator.classList.add('hidden');
+                return;
+            }
+
+            const partnerTs = data.typing[state.partnerUid] || 0;
+            const elapsed = Date.now() - partnerTs;
+
+            if (partnerTs > 0 && elapsed < 3200) {
+                indicator.classList.remove('hidden');
+                typingHideTimer = setTimeout(() => {
+                    indicator.classList.add('hidden');
+                }, 3200 - elapsed);
+            } else {
+                indicator.classList.add('hidden');
+            }
+        }
 
         window.addSuggestedTag = (tag) => addTag(tag);
 
@@ -759,7 +817,6 @@
             return Boolean(presenceData.online && (Date.now() - presenceData.lastSeen < 65000));
         }
 
-        // Spark-Free Background Garbage Collector
         async function runBackgroundGarbageCollector() {
             if (!useFirebase || !currentUser) return;
             const now = Date.now();
@@ -1038,6 +1095,7 @@
             }
         };
 
+        // Call & Friend Action Buttons: Voice & Video shown for both strangers and friends
         function updateChatHeaderActionButtons() {
             const addBtn = document.getElementById('add-friend-btn');
             const voiceBtn = document.getElementById('voice-call-btn');
@@ -1056,25 +1114,39 @@
                 return;
             }
 
+            // Show Voice & Video buttons in all active chats
+            voiceBtn.classList.remove('hidden');
+            videoBtn.classList.remove('hidden');
+
             const alreadyFriend = Boolean(state.friendsMap[state.partnerUid]);
             if (alreadyFriend) {
                 addBtn.classList.add('hidden');
                 addBtn.classList.remove('flex');
-                voiceBtn.classList.remove('hidden');
-                videoBtn.classList.remove('hidden');
                 unfriendBtn.classList.remove('hidden');
                 friendBadge.classList.remove('hidden');
                 subscribePartnerPresence(state.partnerUid);
             } else {
                 addBtn.classList.remove('hidden');
                 addBtn.classList.add('flex');
-                voiceBtn.classList.add('hidden');
-                videoBtn.classList.add('hidden');
                 unfriendBtn.classList.add('hidden');
                 friendBadge.classList.add('hidden');
             }
             lucide.createIcons();
         }
+
+        // Clicking Call on a stranger prompts Add Friend; once friend, starts call directly
+        window.handleCallButtonClick = async (type = 'video') => {
+            if (!state.partnerUid) return;
+            if (state.friendsMap[state.partnerUid]) {
+                await startCall(type);
+                return;
+            }
+            const callLabel = type === 'video' ? 'Video Call' : 'Voice Call';
+            const wantsFriend = confirm(`${callLabel} ke liye pehle ${state.partnerName} ko Add Friend karna hoga. Kya aap Friend Request bhejna chahte hain?`);
+            if (wantsFriend) {
+                await handleAddFriendClick();
+            }
+        };
 
         window.handleAddFriendClick = async () => {
             if (!useFirebase || !currentUser || !state.roomId || !state.partnerUid) return;
@@ -1092,7 +1164,7 @@
                         status: 'pending'
                     }
                 });
-                showToast('Friend request sent!');
+                showToast('Friend request sent! Accept hote hi call unlock ho jayegi.');
             } catch (err) {
                 showToast('Could not send request');
                 addText.textContent = 'Add Friend';
@@ -1118,6 +1190,7 @@
                 await updateDoc(roomRef, {
                     'friendRequest.status': 'accepted'
                 });
+                updateChatHeaderActionButtons();
                 appendSystemBanner(`You and ${state.partnerName} are now Friends! Voice & Video calls unlocked.`);
             } catch (err) {
                 showToast('Error accepting request');
@@ -1170,6 +1243,7 @@
             document.getElementById('messages-stream').classList.remove('hidden');
             document.getElementById('messages-stream').innerHTML = '';
             document.getElementById('icebreakers-bar').classList.add('hidden');
+            document.getElementById('typing-indicator').classList.add('hidden');
             document.getElementById('match-badge').classList.remove('hidden');
             document.getElementById('friend-request-banner').classList.add('hidden');
 
@@ -1194,6 +1268,11 @@
                 lastActivity: Date.now()
             }, { merge: true });
 
+            state.unsubRoom = onSnapshot(roomRef, (snap) => {
+                if (!snap.exists()) return;
+                handlePartnerTypingSnapshot(snap.data());
+            }, (err) => console.error(err));
+
             subscribeToMessages(fRoomId);
         };
 
@@ -1211,7 +1290,7 @@
 
             const rawAlias = document.getElementById('alias-input').value.trim();
             state.alias = rawAlias || 'Stranger';
-            localStorage.setItem('sm_alias', state.alias);
+            localStorage.setItem('sm_alias', rawAlias);
             updateMyPresence(true);
 
             document.getElementById('lobby-view').classList.add('hidden');
@@ -1289,6 +1368,7 @@
                             [matchedDoc.id]: matchedDoc.interests || [],
                             [uid]: state.interests
                         },
+                        typing: {},
                         active: true,
                         createdAt: now,
                         lastActivity: now
@@ -1347,6 +1427,7 @@
             document.getElementById('searching-overlay').classList.add('hidden');
             document.getElementById('messages-stream').classList.remove('hidden');
             document.getElementById('icebreakers-bar').classList.remove('hidden');
+            document.getElementById('typing-indicator').classList.add('hidden');
             document.getElementById('match-badge').classList.remove('hidden');
             document.getElementById('online-dot').classList.remove('hidden');
 
@@ -1377,6 +1458,8 @@
             state.unsubRoom = onSnapshot(roomRef, (snap) => {
                 if (!snap.exists()) return;
                 const data = snap.data();
+
+                handlePartnerTypingSnapshot(data);
 
                 if (data.friendRequest) {
                     const req = data.friendRequest;
@@ -1442,12 +1525,14 @@
 
             input.value = '';
             document.getElementById('icebreakers-bar').classList.add('hidden');
+            clearMyTypingFlag();
             await dispatchMessage(text, null);
         };
 
         window.sendQuickText = async (text) => {
             if (state.status !== 'connected' && state.status !== 'friend_chat') return;
             document.getElementById('icebreakers-bar').classList.add('hidden');
+            clearMyTypingFlag();
             await dispatchMessage(text, null);
         };
 
@@ -1855,6 +1940,7 @@
         };
 
         window.leaveToLobby = async () => {
+            clearMyTypingFlag();
             await notifyRoomClosed();
             cleanupSession();
             state.status = 'lobby';
@@ -1867,6 +1953,8 @@
 
         function handlePartnerDisconnected() {
             state.status = 'disconnected';
+            clearTimeout(typingHideTimer);
+            document.getElementById('typing-indicator').classList.add('hidden');
             document.getElementById('message-input').disabled = true;
             document.getElementById('send-btn').disabled = true;
             document.getElementById('photo-btn').disabled = true;
@@ -1893,6 +1981,8 @@
         }
 
         function cleanupSession() {
+            clearTimeout(typingHideTimer);
+            document.getElementById('typing-indicator').classList.add('hidden');
             if (state.unsubRoom) { state.unsubRoom(); state.unsubRoom = null; }
             if (state.unsubMessages) { state.unsubMessages(); state.unsubMessages = null; }
             if (state.unsubPartnerPresence) { state.unsubPartnerPresence(); state.unsubPartnerPresence = null; }
