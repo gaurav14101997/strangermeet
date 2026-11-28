@@ -234,7 +234,7 @@
                     </div>
                 </div>
 
-                <!-- Right: Compact Action Buttons (Voice & Video Always Visible During Chat) -->
+                <!-- Right: Compact Action Buttons -->
                 <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
                     <button onclick="handleAddFriendClick()" id="add-friend-btn" class="hidden items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 text-blue-600 dark:text-blue-400 text-xs font-semibold transition-colors" title="Add Friend">
                         <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
@@ -580,7 +580,7 @@
         }
     </script>
 
-    <!-- FIREBASE + TYPING + SEEN RECEIPTS + CALL FRIEND GATE + AUTO-CLEANUP + WEBRTC LOGIC -->
+    <!-- FIREBASE + TYPING + SEEN RECEIPTS + CALL FRIEND GATE + AUTO-CLEANUP + METERED TURN WEBRTC LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -647,10 +647,31 @@
             camEnabled: true
         };
 
+        // STUN + Metered Global TURN servers for Jio, Airtel, Vodafone (Vi), BSNL & Wi-Fi reliability
         const ICE_SERVERS = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
+                { urls: 'stun:stun.relay.metered.ca:80' },
+                {
+                    urls: 'turn:global.relay.metered.ca:80',
+                    username: '4d7ef254ca3cf276e3b4b999',
+                    credential: 'y2VBsWKBv98Cm9sj'
+                },
+                {
+                    urls: 'turn:global.relay.metered.ca:80?transport=tcp',
+                    username: '4d7ef254ca3cf276e3b4b999',
+                    credential: 'y2VBsWKBv98Cm9sj'
+                },
+                {
+                    urls: 'turn:global.relay.metered.ca:443',
+                    username: '4d7ef254ca3cf276e3b4b999',
+                    credential: 'y2VBsWKBv98Cm9sj'
+                },
+                {
+                    urls: 'turns:global.relay.metered.ca:443?transport=tcp',
+                    username: '4d7ef254ca3cf276e3b4b999',
+                    credential: 'y2VBsWKBv98Cm9sj'
+                }
             ]
         };
 
