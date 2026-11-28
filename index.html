@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -213,7 +212,7 @@
             </div>
         </section>
 
-        <!-- VIEW 2: ACTIVE CHAT BOX (TYPING + CALLS WITH FRIEND GATE + AUTO-CLEANUP) -->
+        <!-- VIEW 2: ACTIVE CHAT BOX (TYPING + SEEN + CALLS WITH FRIEND GATE + AUTO-CLEANUP) -->
         <section id="chat-view" class="hidden w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex-col overflow-hidden">
             
             <div class="px-2.5 sm:px-4 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-1.5 flex-shrink-0">
@@ -489,8 +488,8 @@
         </div>
 
         <div class="relative w-full max-w-3xl flex-1 my-4 rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 flex items-center justify-center">
-            <video id="remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
-            <div id="audio-only-avatar" class="hidden flex-col items-center gap-3">
+            <video id="remote-video" autoplay playsinline class="w-full h-full object-cover transition-opacity"></video>
+            <div id="audio-only-avatar" class="hidden absolute inset-0 flex-col items-center justify-center gap-3 pointer-events-none">
                 <div id="call-avatar-circle" class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-3xl font-bold shadow-lg">F</div>
                 <p class="text-sm text-gray-300">Voice Call Active</p>
             </div>
@@ -581,7 +580,7 @@
         }
     </script>
 
-    <!-- FIREBASE + TYPING + CALL FRIEND GATE + AUTO-CLEANUP + WEBRTC LOGIC -->
+    <!-- FIREBASE + TYPING + SEEN RECEIPTS + CALL FRIEND GATE + AUTO-CLEANUP + WEBRTC LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -655,6 +654,7 @@
             ]
         };
 
+        let pendingCandidates = [];
         let lastTypingSent = 0;
         let typingHideTimer = null;
 
@@ -866,6 +866,20 @@
             } catch (e) {}
         }
 
+        async function markUnreadMessagesAsSeen(roomId) {
+            if (!useFirebase || !currentUser || !roomId || document.hidden) return;
+            try {
+                const msgsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', roomId, 'messages');
+                const snap = await getDocs(msgsCol);
+                snap.forEach(d => {
+                    const data = d.data();
+                    if (data.senderId !== currentUser.uid && !data.seen) {
+                        updateDoc(d.ref, { seen: true, seenAt: Date.now() }).catch(() => {});
+                    }
+                });
+            } catch (e) {}
+        }
+
         function startPresenceTracking() {
             updateMyPresence(true);
             clearInterval(state.presenceHeartbeat);
@@ -877,6 +891,9 @@
 
             document.addEventListener('visibilitychange', () => {
                 updateMyPresence(!document.hidden);
+                if (!document.hidden && state.roomId && (state.status === 'connected' || state.status === 'friend_chat')) {
+                    markUnreadMessagesAsSeen(state.roomId);
+                }
             });
             window.addEventListener('beforeunload', () => {
                 updateMyPresence(false);
@@ -1097,7 +1114,6 @@
             }
         };
 
-        // Call & Friend Action Buttons: Voice & Video shown for both strangers and friends
         function updateChatHeaderActionButtons() {
             const addBtn = document.getElementById('add-friend-btn');
             const voiceBtn = document.getElementById('voice-call-btn');
@@ -1116,7 +1132,6 @@
                 return;
             }
 
-            // Show Voice & Video buttons in all active chats
             voiceBtn.classList.remove('hidden');
             videoBtn.classList.remove('hidden');
 
@@ -1136,7 +1151,6 @@
             lucide.createIcons();
         }
 
-        // Clicking Call on a stranger prompts Add Friend; once friend, starts call directly
         window.handleCallButtonClick = async (type = 'video') => {
             if (!state.partnerUid) return;
             if (state.friendsMap[state.partnerUid]) {
@@ -1509,11 +1523,23 @@
                 }
 
                 validMsgs.forEach(m => {
+                    const isMe = currentUser && m.senderId === currentUser.uid;
+
+                    // Automatically mark partner's message as seen when chat tab is visible
+                    if (!isMe && !m.seen && !document.hidden) {
+                        updateDoc(m.ref, { seen: true, seenAt: Date.now() }).catch(() => {});
+                    }
+
                     if (!state.renderedMsgIds.has(m.id)) {
                         state.renderedMsgIds.add(m.id);
-                        const isMe = currentUser && m.senderId === currentUser.uid;
-                        appendMessageBubble(m.text || '', isMe, m.timestamp, m.imageData || null);
+                        appendMessageBubble(m.id, m.text || '', isMe, m.timestamp, m.imageData || null, Boolean(m.seen));
                         if (!isMe) playChime('msg');
+                    } else if (isMe) {
+                        const statusEl = document.getElementById(`msg-status-${m.id}`);
+                        if (statusEl) {
+                            statusEl.textContent = m.seen ? ' • Seen' : ' • Sent';
+                            statusEl.className = m.seen ? 'font-semibold text-white' : 'text-blue-100/80';
+                        }
                     }
                 });
             }, (err) => console.error(err));
@@ -1592,7 +1618,8 @@
                         senderId: currentUser.uid,
                         text: text || '',
                         imageData: imageData || null,
-                        timestamp: now
+                        timestamp: now,
+                        seen: false
                     });
                     updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', state.roomId), {
                         lastActivity: now
@@ -1612,7 +1639,7 @@
             stream.scrollTop = stream.scrollHeight;
         }
 
-        function appendMessageBubble(text, isMe, timestamp, imageData = null) {
+        function appendMessageBubble(msgId, text, isMe, timestamp, imageData = null, isSeen = false) {
             const stream = document.getElementById('messages-stream');
             const wrapper = document.createElement('div');
             wrapper.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
@@ -1643,18 +1670,48 @@
             }
 
             if (timestamp) {
-                const timeSpan = document.createElement('span');
-                timeSpan.className = isMe
-                    ? 'block text-[10px] text-blue-100/90 text-right mt-1 select-none'
+                const metaRow = document.createElement('div');
+                metaRow.className = isMe
+                    ? 'flex items-center justify-end gap-1 text-[10px] text-blue-100/90 mt-1 select-none'
                     : 'block text-[10px] text-gray-400 dark:text-gray-500 text-right mt-1 select-none';
+
+                const timeSpan = document.createElement('span');
                 timeSpan.textContent = formatChatTime(timestamp);
-                bubble.appendChild(timeSpan);
+                metaRow.appendChild(timeSpan);
+
+                if (isMe) {
+                    const statusSpan = document.createElement('span');
+                    statusSpan.id = `msg-status-${msgId}`;
+                    statusSpan.className = isSeen ? 'font-semibold text-white' : 'text-blue-100/80';
+                    statusSpan.textContent = isSeen ? ' • Seen' : ' • Sent';
+                    metaRow.appendChild(statusSpan);
+                }
+
+                bubble.appendChild(metaRow);
             }
 
             wrapper.appendChild(senderLabel);
             wrapper.appendChild(bubble);
             stream.appendChild(wrapper);
             stream.scrollTop = stream.scrollHeight;
+        }
+
+        function attachPeerConnectionMonitors(pc) {
+            pc.onconnectionstatechange = () => {
+                if (!pc) return;
+                if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
+                    showToast('Call connection lost');
+                    endCall(true);
+                }
+            };
+        }
+
+        async function flushPendingCandidates() {
+            if (!rtcState.pc || !rtcState.pc.remoteDescription) return;
+            while (pendingCandidates.length > 0) {
+                const candidate = pendingCandidates.shift();
+                await rtcState.pc.addIceCandidate(candidate).catch(() => {});
+            }
         }
 
         function listenToIncomingCalls() {
@@ -1693,18 +1750,22 @@
             if (rtcState.pc) return;
 
             rtcState.callType = type;
+            pendingCandidates = [];
             openCallModal(state.partnerName, type, 'Calling...');
 
             try {
                 rtcState.localStream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: type === 'video'
+                    audio: { echoCancellation: true, noiseSuppression: true },
+                    video: type === 'video' ? { facingMode: 'user' } : false
                 });
                 document.getElementById('local-video').srcObject = rtcState.localStream;
 
                 rtcState.pc = new RTCPeerConnection(ICE_SERVERS);
+                attachPeerConnectionMonitors(rtcState.pc);
+
                 rtcState.remoteStream = new MediaStream();
-                document.getElementById('remote-video').srcObject = rtcState.remoteStream;
+                const remoteVideoEl = document.getElementById('remote-video');
+                remoteVideoEl.srcObject = rtcState.remoteStream;
 
                 rtcState.localStream.getTracks().forEach(track => {
                     rtcState.pc.addTrack(track, rtcState.localStream);
@@ -1714,6 +1775,7 @@
                     event.streams[0].getTracks().forEach(track => {
                         rtcState.remoteStream.addTrack(track);
                     });
+                    remoteVideoEl.play().catch(() => {});
                 };
 
                 const callDocRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'calls'));
@@ -1742,7 +1804,7 @@
 
                 rtcState.unsubCallDoc = onSnapshot(callDocRef, async (snap) => {
                     const data = snap.data();
-                    if (!data) return;
+                    if (!data || !rtcState.pc) return;
 
                     if (data.status === 'declined' || data.status === 'ended') {
                         showToast(data.status === 'declined' ? 'Call declined' : 'Call ended');
@@ -1753,18 +1815,23 @@
                     if (!rtcState.pc.currentRemoteDescription && data.answer) {
                         const answerDesc = new RTCSessionDescription(data.answer);
                         await rtcState.pc.setRemoteDescription(answerDesc);
+                        await flushPendingCandidates();
                         document.getElementById('call-status-text').textContent = 'Connected';
                         startCallTimer();
                     }
                 });
 
-                rtcState.unsubCandidates = onSnapshot(answerCandidatesCol, (snap) => {
-                    snap.docChanges().forEach(change => {
-                        if (change.type === 'added') {
+                rtcState.unsubCandidates = onSnapshot(answerCandidatesCol, async (snap) => {
+                    for (const change of snap.docChanges()) {
+                        if (change.type === 'added' && rtcState.pc) {
                             const candidate = new RTCIceCandidate(change.doc.data());
-                            rtcState.pc.addIceCandidate(candidate).catch(() => {});
+                            if (rtcState.pc.remoteDescription) {
+                                await rtcState.pc.addIceCandidate(candidate).catch(() => {});
+                            } else {
+                                pendingCandidates.push(candidate);
+                            }
                         }
-                    });
+                    }
                 });
             } catch (err) {
                 console.error('Call error:', err);
@@ -1780,18 +1847,22 @@
 
             rtcState.callId = callData.id;
             rtcState.callType = callData.callType || 'video';
+            pendingCandidates = [];
             openCallModal(callData.callerName || 'Friend', rtcState.callType, 'Connecting...');
 
             try {
                 rtcState.localStream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: rtcState.callType === 'video'
+                    audio: { echoCancellation: true, noiseSuppression: true },
+                    video: rtcState.callType === 'video' ? { facingMode: 'user' } : false
                 });
                 document.getElementById('local-video').srcObject = rtcState.localStream;
 
                 rtcState.pc = new RTCPeerConnection(ICE_SERVERS);
+                attachPeerConnectionMonitors(rtcState.pc);
+
                 rtcState.remoteStream = new MediaStream();
-                document.getElementById('remote-video').srcObject = rtcState.remoteStream;
+                const remoteVideoEl = document.getElementById('remote-video');
+                remoteVideoEl.srcObject = rtcState.remoteStream;
 
                 rtcState.localStream.getTracks().forEach(track => {
                     rtcState.pc.addTrack(track, rtcState.localStream);
@@ -1801,6 +1872,7 @@
                     event.streams[0].getTracks().forEach(track => {
                         rtcState.remoteStream.addTrack(track);
                     });
+                    remoteVideoEl.play().catch(() => {});
                 };
 
                 const callDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'calls', callData.id);
@@ -1814,6 +1886,8 @@
                 };
 
                 await rtcState.pc.setRemoteDescription(new RTCSessionDescription(callData.offer));
+                await flushPendingCandidates();
+
                 const answerDescription = await rtcState.pc.createAnswer();
                 await rtcState.pc.setLocalDescription(answerDescription);
 
@@ -1833,13 +1907,17 @@
                     }
                 });
 
-                rtcState.unsubCandidates = onSnapshot(offerCandidatesCol, (snap) => {
-                    snap.docChanges().forEach(change => {
-                        if (change.type === 'added') {
+                rtcState.unsubCandidates = onSnapshot(offerCandidatesCol, async (snap) => {
+                    for (const change of snap.docChanges()) {
+                        if (change.type === 'added' && rtcState.pc) {
                             const candidate = new RTCIceCandidate(change.doc.data());
-                            rtcState.pc.addIceCandidate(candidate).catch(() => {});
+                            if (rtcState.pc.remoteDescription) {
+                                await rtcState.pc.addIceCandidate(candidate).catch(() => {});
+                            } else {
+                                pendingCandidates.push(candidate);
+                            }
                         }
-                    });
+                    }
                 });
             } catch (err) {
                 console.error('Accept call error:', err);
@@ -1868,7 +1946,9 @@
             document.getElementById('call-timer').textContent = '00:00';
 
             const isVideo = type === 'video';
-            document.getElementById('remote-video').classList.toggle('hidden', !isVideo);
+            const remoteVideo = document.getElementById('remote-video');
+            remoteVideo.classList.toggle('opacity-0', !isVideo);
+            remoteVideo.classList.toggle('pointer-events-none', !isVideo);
             document.getElementById('local-video').classList.toggle('hidden', !isVideo);
             document.getElementById('toggle-cam-btn').classList.toggle('hidden', !isVideo);
             document.getElementById('audio-only-avatar').classList.toggle('hidden', isVideo);
@@ -1922,6 +2002,7 @@
                 rtcState.pc.close();
                 rtcState.pc = null;
             }
+            pendingCandidates = [];
             rtcState.callId = null;
             rtcState.incomingCallData = null;
             rtcState.micEnabled = true;
